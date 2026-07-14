@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: banking-api
+
+  profiles:
+    active: dev
+
+server:
+  port: 8080
