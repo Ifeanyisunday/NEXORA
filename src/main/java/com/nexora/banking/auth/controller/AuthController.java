@@ -12,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.nexora.banking.user.entity.User;
+import com.nexora.banking.user.mapper.UserMapper;
 
 
 @RestController
@@ -21,6 +24,7 @@ public class AuthController {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(
@@ -47,8 +51,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public UserResponse me(
-            @AuthenticationPrincipal
-            User user
+            @AuthenticationPrincipal User user
     ) {
         return userMapper.toResponse(user);
     }

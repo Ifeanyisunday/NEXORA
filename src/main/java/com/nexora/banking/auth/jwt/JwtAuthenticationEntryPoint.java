@@ -50,15 +50,11 @@ public class JwtAuthenticationEntryPoint
         );
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
-
         response.setContentType("application/json");
 
         objectMapper.writeValue(
-
                 response.getOutputStream(),
-
                 error
-
         );
 
     }

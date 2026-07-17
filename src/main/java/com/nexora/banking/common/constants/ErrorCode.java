@@ -16,4 +16,6 @@ public enum ErrorCode {
 
     UNAUTHORIZED,
 
+    ACCESS_DENIED,
+
 }

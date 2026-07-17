@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.nexora.banking.wallet.service.WalletService;
 
 
 @Service
@@ -19,18 +20,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserServiceImpl implements UserService{
 
-    private final UserRepository repository;
-    private final UserMapper mapper;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final WalletService walletService;
 
 
     @Override
     public UserResponse register(RegisterUserRequest request) {
-        if(repository.existsByEmail(request.email())){
+        if(userRepository.existsByEmail(request.email())){
             throw new EmailAlreadyExistsException(request.email()) ;
         }
 
-        User user = mapper.toEntity(request);
+        User user = userMapper.toEntity(request);
 
         user.setPasswordHash(
             passwordEncoder.encode(request.password())
@@ -40,9 +42,11 @@ public class UserServiceImpl implements UserService{
         user.setEmailVerified(false);
         user.setFailedLoginAttempts(0);
 
-        User savedUser = repository.save(user);
+        User savedUser = userRepository.save(user);
 
-        return mapper.toResponse(savedUser);
+        walletService.createWallet(savedUser);
+
+        return userMapper.toResponse(savedUser);
 
 
     }

@@ -43,21 +43,15 @@ public class JwtService {
         Instant now = Instant.now();
 
         return Jwts.builder()
-
                 .claims(extraClaims)
-
                 .subject(userDetails.getUsername())
-
                 .issuedAt(Date.from(now))
-
                 .expiration(
                         Date.from(
                                 now.plusMillis(jwtExpiration)
                         )
                 )
-
                 .signWith(getSigningKey())
-
                 .compact();
     }
 
@@ -82,9 +76,7 @@ public class JwtService {
             String token,
             Function<Claims, T> claimsResolver
     ) {
-
         Claims claims = extractAllClaims(token);
-
         return claimsResolver.apply(claims);
     }
 
@@ -95,51 +87,36 @@ public class JwtService {
             String token,
             UserDetails userDetails
     ) {
-
         String username = extractUsername(token);
-
         return username.equals(userDetails.getUsername())
                 && !isTokenExpired(token);
-
     }
 
     /**
      * Check expiration
      */
     private boolean isTokenExpired(String token) {
-
         return extractExpiration(token)
                 .before(new Date());
-
     }
 
     /**
      * Parse claims
      */
     private Claims extractAllClaims(String token) {
-
         return Jwts.parser()
-
                 .verifyWith(getSigningKey())
-
                 .build()
-
                 .parseSignedClaims(token)
-
                 .getPayload();
-
     }
 
     /**
      * Signing key
      */
     private SecretKey getSigningKey() {
-
         byte[] keyBytes =
                 Decoders.BASE64.decode(secret);
-
         return Keys.hmacShaKeyFor(keyBytes);
-
     }
-
 }
