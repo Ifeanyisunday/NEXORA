@@ -1,5 +1,8 @@
 package com.nexora.banking.auth.controller;
 
+import com.nexora.banking.auth.dto.request.LoginRequest;
+import com.nexora.banking.auth.dto.response.LoginResponse;
+import com.nexora.banking.auth.service.AuthenticationService;
 import com.nexora.banking.user.dto.request.RegisterUserRequest;
 import com.nexora.banking.user.dto.response.UserResponse;
 import com.nexora.banking.user.service.UserService;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private final AuthenticationService authenticationService;
     private final UserService userService;
 
     @PostMapping("/register")
@@ -28,4 +32,24 @@ public class AuthController {
                 .body(response);
     }
 
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(
+
+            @Valid
+            @RequestBody
+            LoginRequest request
+    ) {
+        return ResponseEntity.ok(
+            authenticationService.login(request)
+        );
+    }
+
+    @GetMapping("/me")
+    public UserResponse me(
+            @AuthenticationPrincipal
+            User user
+    ) {
+        return userMapper.toResponse(user);
+    }
 }

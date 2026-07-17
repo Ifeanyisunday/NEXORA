@@ -12,6 +12,8 @@ public enum ErrorCode {
 
     ACCOUNT_LOCKED,
 
-    INSUFFICIENT_BALANCE
+    INSUFFICIENT_BALANCE,
+
+    UNAUTHORIZED,
 
 }
