@@ -1,6 +1,0 @@
-CREATE TYPE user_status AS ENUM (
-    'ACTIVE',
-    'LOCKED',
-    'DISABLED',
-    'PENDING_VERIFICATION'
-);

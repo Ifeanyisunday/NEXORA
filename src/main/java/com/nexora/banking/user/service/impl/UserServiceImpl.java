@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.nexora.banking.wallet.service.WalletService;
+import com.nexora.banking.auth.enums.UserRole;
 
 
 @Service
@@ -38,6 +39,7 @@ public class UserServiceImpl implements UserService{
             passwordEncoder.encode(request.password())
         );
 
+        user.setRole(UserRole.CUSTOMER);
         user.setStatus(UserStatus.PENDING_VERIFICATION);
         user.setEmailVerified(false);
         user.setFailedLoginAttempts(0);

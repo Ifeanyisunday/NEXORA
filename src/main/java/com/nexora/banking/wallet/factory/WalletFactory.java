@@ -7,8 +7,8 @@ import com.nexora.banking.wallet.entity.WalletStatus;
 
 import java.math.BigDecimal;
 
+@SuppressWarnings("null")
 public final class WalletFactory {
-
     private WalletFactory() {
     }
 

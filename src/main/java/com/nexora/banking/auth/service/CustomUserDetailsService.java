@@ -1,6 +1,6 @@
 package com.nexora.banking.auth.service;
 
-import com.nexora.banking.user.entity.User;
+// import com.nexora.banking.user.entity.User;
 import com.nexora.banking.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

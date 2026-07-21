@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/banking_db
+    url: jdbc:postgresql://localhost:5432/nexora
     username: postgres
     password: vitalspring10
 

@@ -1,5 +1,5 @@
 -- ==========================================================
--- Migration : V2
+-- Migration : V3
 -- Description: Create users table
 -- Project: Nexora Banking API
 -- ==========================================================
@@ -13,7 +13,9 @@ CREATE TABLE users (
 
     password_hash VARCHAR(255) NOT NULL,
 
-    status user_status NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'CUSTOMER',
+
+    status user_status NOT NULL DEFAULT 'PENDING_VERIFICATION',
 
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
 
@@ -40,7 +42,6 @@ CREATE TABLE users (
 
 );
 
-
 COMMENT ON TABLE users IS
 'Authentication identities for platform users';
 
@@ -52,3 +53,6 @@ COMMENT ON COLUMN users.password_hash IS
 
 COMMENT ON COLUMN users.status IS
 'Current account status';
+
+COMMENT ON COLUMN users.role IS
+'Authorization role assigned to the user';

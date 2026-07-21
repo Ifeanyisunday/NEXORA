@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@SuppressWarnings("null")
 @Service
 @RequiredArgsConstructor
 public class WalletService {

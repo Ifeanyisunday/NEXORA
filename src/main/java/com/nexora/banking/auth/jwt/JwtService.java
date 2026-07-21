@@ -1,11 +1,11 @@
 package com.nexora.banking.auth.jwt;
 
-import com.nexora.banking.user.entity.User;
+// import com.nexora.banking.user.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.JwtException;
+// import io.jsonwebtoken.JwtException;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -59,14 +59,14 @@ public class JwtService {
      * Extract username(email)
      */
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    return extractClaim(token, claims -> claims.getSubject());
     }
 
     /**
      * Extract expiration date
      */
     public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+        return extractClaim(token, claims -> claims.getExpiration());
     }
 
     /**

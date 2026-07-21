@@ -21,7 +21,10 @@ public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "version", ignore = true)
+    @Mapping(target = "role", constant = "CUSTOMER")
+    @Mapping(target = "authorities", ignore = true)
 
+    
     User toEntity(RegisterUserRequest request);
 
     UserResponse toResponse(User user);

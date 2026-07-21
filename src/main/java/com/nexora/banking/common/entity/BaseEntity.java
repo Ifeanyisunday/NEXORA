@@ -25,7 +25,6 @@ public abstract class BaseEntity {
     private Long version;
 
 
-
     @PrePersist
     protected void onCreate() {
 

@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Entity
 @Table(
@@ -20,10 +19,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class Wallet extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
@@ -47,9 +42,6 @@ public class Wallet extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private WalletStatus status;
-
-    @Version
-    private Long version;
 
 
 

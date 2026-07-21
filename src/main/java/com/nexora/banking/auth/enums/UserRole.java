@@ -1,6 +1,6 @@
 package com.nexora.banking.auth.enums;
 
-public enum Role {
+public enum UserRole {
 
     CUSTOMER,
 
