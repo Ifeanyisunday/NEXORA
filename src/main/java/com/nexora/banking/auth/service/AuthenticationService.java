@@ -1,5 +1,6 @@
 package com.nexora.banking.auth.service;
 
+import com.nexora.banking.auth.config.JwtProperties;
 import com.nexora.banking.auth.dto.request.LoginRequest;
 import com.nexora.banking.auth.dto.response.LoginResponse;
 import com.nexora.banking.auth.jwt.JwtService;
@@ -21,8 +22,7 @@ public class AuthenticationService {
 
     private final JwtService jwtService;
 
-    @Value("${jwt.expiration}")
-    private long jwtExpiration;
+    private final JwtProperties jwtProperties;
 
     public LoginResponse login(LoginRequest request) {
 
@@ -43,7 +43,7 @@ public class AuthenticationService {
             return new LoginResponse(
                     token,
                     "Bearer",
-                    jwtExpiration / 1000,
+                    jwtProperties.getExpiration().toSeconds(),
                     user.getEmail(),
                     user.getRole().name()
             );

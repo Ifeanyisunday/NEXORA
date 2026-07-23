@@ -9,6 +9,9 @@ import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.nexora.banking.auth.config.JwtProperties;
+
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
@@ -22,8 +25,7 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration}")
-    private long jwtExpiration;
+    private JwtProperties jwtProperties;
 
     /**
      * Generate token without extra claims.
@@ -41,16 +43,17 @@ public class JwtService {
     ) {
 
         Instant now = Instant.now();
+        Date issuedAt = Date.from(now);
+        Date expiration = Date.from(
+                now.plus(jwtProperties.getExpiration())
+        );
 
         return Jwts.builder()
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())
                 .issuedAt(Date.from(now))
-                .expiration(
-                        Date.from(
-                                now.plusMillis(jwtExpiration)
-                        )
-                )
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiration)
                 .signWith(getSigningKey())
                 .compact();
     }

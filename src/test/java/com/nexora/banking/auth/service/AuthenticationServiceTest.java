@@ -1,14 +1,19 @@
 package com.nexora.banking.auth.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.time.Duration;
+
+import com.nexora.banking.auth.config.JwtProperties;
 import com.nexora.banking.auth.dto.request.LoginRequest;
 import com.nexora.banking.auth.dto.response.LoginResponse;
 import com.nexora.banking.auth.jwt.JwtService;
 import com.nexora.banking.auth.enums.UserRole;
 import com.nexora.banking.user.entity.User;
+import com.nexora.banking.common.exception.InvalidCredentialsException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,6 +41,9 @@ class AuthenticationServiceTest {
     @Mock
     private Authentication authentication;
 
+    @Mock
+    private JwtProperties jwtProperties;
+
     @InjectMocks
     private AuthenticationService authenticationService;
 
@@ -43,9 +52,6 @@ class AuthenticationServiceTest {
 
     private static final String JWT_TOKEN =
             "test.jwt.token";
-
-    private static final long JWT_EXPIRATION =
-            900_000L;
 
     @BeforeEach
     void setUp() {
@@ -79,6 +85,9 @@ class AuthenticationServiceTest {
 
         when(jwtService.generateToken(user))
                 .thenReturn(JWT_TOKEN);
+        
+        when(jwtProperties.getExpiration())
+                .thenReturn(Duration.ofMinutes(15));
 
         // Act
         LoginResponse response =
@@ -190,11 +199,11 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void login_shouldPropagateAuthenticationFailure() {
+    void login_shouldConvertAuthenticationFailureToInvalidCredentialsException() {
 
         // Arrange
-        var authenticationException =
-                new org.springframework.security.authentication.BadCredentialsException(
+        BadCredentialsException authenticationException =
+                new BadCredentialsException(
                         "Bad credentials"
                 );
 
@@ -203,11 +212,15 @@ class AuthenticationServiceTest {
         )).thenThrow(authenticationException);
 
         // Act + Assert
-        org.assertj.core.api.Assertions
-                .assertThatThrownBy(
-                        () -> authenticationService.login(request)
-                )
-                .isSameAs(authenticationException);
+        assertThatThrownBy(
+                () -> authenticationService.login(request)
+        )
+        .isInstanceOf(
+            InvalidCredentialsException.class
+        )
+        .hasMessage(
+            "Invalid email or password."
+        );
 
         // JWT must never be generated
         verifyNoInteractions(jwtService);
