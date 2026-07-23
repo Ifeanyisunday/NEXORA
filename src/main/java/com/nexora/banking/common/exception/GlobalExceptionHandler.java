@@ -42,4 +42,49 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+        public ResponseEntity<ApiErrorResponse> handleEmailAlreadyExists(
+                EmailAlreadyExistsException ex,
+                HttpServletRequest request
+        ) {
+
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "EMAIL_ALREADY_EXISTS",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+     }
+
+     
+     @ExceptionHandler(InvalidCredentialsException.class)
+        public ResponseEntity<ApiErrorResponse> handleInvalidCredentials(
+                InvalidCredentialsException ex,
+                HttpServletRequest request
+        ) {
+
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "INVALID_CREDENTIALS",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+      }
+
 }
