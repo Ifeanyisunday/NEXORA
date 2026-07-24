@@ -1,4 +1,4 @@
-package com.nexora.banking.wallet.entity;
+package com.nexora.banking.wallet.enums;
 
 public enum Currency {
 

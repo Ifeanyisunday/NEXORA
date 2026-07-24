@@ -8,7 +8,7 @@ import com.nexora.banking.transfer.mapper.TransferMapper;
 import com.nexora.banking.transfer.repository.TransferRepository;
 import com.nexora.banking.user.entity.User;
 import com.nexora.banking.wallet.entity.Wallet;
-import com.nexora.banking.wallet.entity.WalletStatus;
+import com.nexora.banking.wallet.enums.WalletStatus;
 import com.nexora.banking.wallet.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -8,11 +8,13 @@ import com.nexora.banking.common.exception.EmailAlreadyExistsException;
 import com.nexora.banking.user.mapper.UserMapper;
 import com.nexora.banking.user.repository.UserRepository;
 import com.nexora.banking.user.service.UserService;
+import com.nexora.banking.wallet.service.impl.WalletServiceImpl;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.nexora.banking.wallet.service.WalletService;
+
 import com.nexora.banking.auth.enums.UserRole;
 
 
@@ -24,7 +26,7 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final WalletService walletService;
+    private final WalletServiceImpl walletService;
 
 
     @Override

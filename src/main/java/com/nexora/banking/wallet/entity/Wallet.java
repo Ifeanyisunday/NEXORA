@@ -2,6 +2,9 @@ package com.nexora.banking.wallet.entity;
 
 import com.nexora.banking.common.entity.BaseEntity;
 import com.nexora.banking.user.entity.User;
+import com.nexora.banking.wallet.enums.Currency;
+import com.nexora.banking.wallet.enums.WalletStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 

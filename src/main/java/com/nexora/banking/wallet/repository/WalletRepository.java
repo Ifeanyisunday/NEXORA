@@ -25,10 +25,18 @@ public interface WalletRepository
         SELECT w
         FROM Wallet w
         WHERE w.id = :walletId
-    """)
+        """)
     Optional<Wallet> findByIdForUpdate(
             @Param("walletId") UUID walletId
     );
 
-
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT w
+        FROM Wallet w
+        WHERE w.user.id = :userId
+        """)
+    Optional<Wallet> findByUserIdForUpdate(
+            @Param("userId") UUID userId
+    );
 }

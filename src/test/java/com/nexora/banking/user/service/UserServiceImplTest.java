@@ -1,4 +1,4 @@
-package com.nexora.banking.user.service.impl;
+package com.nexora.banking.user.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,7 +27,7 @@ import com.nexora.banking.user.enums.UserStatus;
 import com.nexora.banking.user.mapper.UserMapper;
 import com.nexora.banking.user.repository.UserRepository;
 import com.nexora.banking.user.service.impl.UserServiceImpl;
-import com.nexora.banking.wallet.service.WalletService;
+import com.nexora.banking.wallet.service.impl.WalletServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -42,7 +42,7 @@ class UserServiceImplTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private WalletService walletService;
+    private WalletServiceImpl walletService;
 
     @InjectMocks
     private UserServiceImpl userService;

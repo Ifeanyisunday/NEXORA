@@ -1,9 +1,9 @@
 package com.nexora.banking.wallet.factory;
 
 import com.nexora.banking.user.entity.User;
-import com.nexora.banking.wallet.entity.Currency;
 import com.nexora.banking.wallet.entity.Wallet;
-import com.nexora.banking.wallet.entity.WalletStatus;
+import com.nexora.banking.wallet.enums.Currency;
+import com.nexora.banking.wallet.enums.WalletStatus;
 
 import java.math.BigDecimal;
 
