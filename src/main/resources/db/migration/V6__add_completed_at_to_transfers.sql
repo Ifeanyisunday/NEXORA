@@ -1,0 +1,2 @@
+ALTER TABLE transfers
+ADD COLUMN completed_at TIMESTAMP WITH TIME ZONE;

@@ -3,7 +3,7 @@ package com.nexora.banking.transfer.service;
 import com.nexora.banking.transfer.dto.request.TransferRequest;
 import com.nexora.banking.transfer.dto.response.TransferResponse;
 import com.nexora.banking.transfer.entity.Transfer;
-import com.nexora.banking.transfer.entity.TransferStatus;
+import com.nexora.banking.transfer.enums.TransferStatus;
 import com.nexora.banking.transfer.mapper.TransferMapper;
 import com.nexora.banking.transfer.repository.TransferRepository;
 import com.nexora.banking.user.entity.User;
