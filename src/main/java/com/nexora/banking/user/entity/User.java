@@ -25,8 +25,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+// import org.hibernate.annotations.JdbcTypeCode;
+// import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "users")

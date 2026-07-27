@@ -25,6 +25,9 @@ public class TransferController {
             @AuthenticationPrincipal
             User currentUser,
 
+            @RequestHeader("Idempotency-Key")
+            String idempotencyKey,
+
             @Valid
             @RequestBody
             TransferRequest request
@@ -33,7 +36,8 @@ public class TransferController {
 
         return transferService.transfer(
                 currentUser,
-                request
+                request,
+                idempotencyKey
         );
 
     }

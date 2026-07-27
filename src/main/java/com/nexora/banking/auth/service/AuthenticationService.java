@@ -7,7 +7,7 @@ import com.nexora.banking.auth.jwt.JwtService;
 import com.nexora.banking.common.exception.InvalidCredentialsException;
 import com.nexora.banking.user.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

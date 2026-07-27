@@ -110,4 +110,116 @@ public class GlobalExceptionHandler {
                 .body(response);
         }
 
+        @ExceptionHandler(IdempotencyKeyConflictException.class)
+        public ResponseEntity<ApiErrorResponse> handleIdempotencyKeyConflict(
+                IdempotencyKeyConflictException ex,
+                HttpServletRequest request
+        ) {
+
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "IDEMPOTENCY_KEY_CONFLICT",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
+
+
+        @ExceptionHandler(SelfTransferException.class)
+        public ResponseEntity<ApiErrorResponse> handleSelfTransfer(
+                SelfTransferException ex,
+                HttpServletRequest request
+        ) {
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "SELF_TRANSFER_NOT_ALLOWED",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
+
+
+        @ExceptionHandler(WalletNotFoundException.class)
+        public ResponseEntity<ApiErrorResponse> handleWalletNotFound(
+                WalletNotFoundException ex,
+                HttpServletRequest request
+        ) {
+
+        HttpStatus status = HttpStatus.NOT_FOUND;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "WALLET_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
+
+
+        @ExceptionHandler(WalletNotActiveException.class)
+        public ResponseEntity<ApiErrorResponse> handleWalletNotActive(
+                WalletNotActiveException ex,
+                HttpServletRequest request
+        ) {
+
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "WALLET_NOT_ACTIVE",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
+
+        @ExceptionHandler(InsufficientBalanceException.class)
+        public ResponseEntity<ApiErrorResponse> handleInsufficientBalance(
+                InsufficientBalanceException ex,
+                HttpServletRequest request
+        ) {
+
+        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "INSUFFICIENT_BALANCE",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
 }

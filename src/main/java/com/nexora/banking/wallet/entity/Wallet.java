@@ -5,6 +5,8 @@ import com.nexora.banking.user.entity.User;
 import com.nexora.banking.wallet.enums.Currency;
 import com.nexora.banking.wallet.enums.WalletStatus;
 
+import com.nexora.banking.common.exception.InsufficientBalanceException;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -47,7 +49,6 @@ public class Wallet extends BaseEntity {
     private WalletStatus status;
 
 
-
     public void deposit(BigDecimal amount) {
         validatePositiveAmount(amount);
         this.balance = this.balance.add(amount);
@@ -58,7 +59,7 @@ public class Wallet extends BaseEntity {
     public void withdraw(BigDecimal amount) {
         validatePositiveAmount(amount);
         if (this.balance.compareTo(amount) < 0) {
-            throw new IllegalStateException(
+            throw new InsufficientBalanceException(
                     "Insufficient balance."
             );
         }
@@ -83,6 +84,21 @@ public class Wallet extends BaseEntity {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException(
                     "Amount must be greater than zero."
+            );
+        }
+    }
+
+    @PrePersist
+    private void validateWallet() {
+        if (balance == null) {
+            throw new IllegalStateException(
+                    "Wallet balance cannot be null."
+            );
+        }
+
+        if (balance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalStateException(
+                    "Wallet balance cannot be negative."
             );
         }
     }
