@@ -1,5 +1,5 @@
 -- ==========================================================
--- Migration : V4
+-- Migration : V5
 -- Description: Create transfers table
 -- Project: Nexora Banking API
 -- ==========================================================

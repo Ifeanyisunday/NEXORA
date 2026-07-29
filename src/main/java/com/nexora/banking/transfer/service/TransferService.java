@@ -18,8 +18,16 @@ import org.springframework.transaction.annotation.Transactional;
 import com.nexora.banking.common.exception.SelfTransferException;
 import com.nexora.banking.common.exception.WalletNotActiveException;
 import com.nexora.banking.common.exception.WalletNotFoundException;
+import com.nexora.banking.transaction.enums.TransactionCategory;
+import com.nexora.banking.transaction.enums.TransactionType;
+import com.nexora.banking.transaction.entity.Transaction;
+import com.nexora.banking.transaction.enums.TransactionStatus;
+import com.nexora.banking.transaction.repository.TransactionRepository;
+import com.nexora.banking.transaction.service.TransactionService;
+import com.nexora.banking.transaction.factory.TransactionFactory;
 
 import java.util.UUID;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -29,10 +37,9 @@ import java.util.Optional;
 public class TransferService {
 
     private final WalletRepository walletRepository;
-
     private final TransferRepository transferRepository;
-
     private final TransferMapper transferMapper;
+    private final TransactionService transactionService;
 
 
     @Transactional
@@ -199,6 +206,8 @@ public class TransferService {
             );
         }
 
+        BigDecimal senderBalanceBefore = senderWallet.getBalance();
+        BigDecimal receiverBalanceBefore = receiverWallet.getBalance();
 
         // 11. Debit sender
 
@@ -212,6 +221,9 @@ public class TransferService {
         receiverWallet.deposit(
                 request.amount()
         );
+
+        BigDecimal senderBalanceAfter = senderWallet.getBalance();
+        BigDecimal receiverBalanceAfter = receiverWallet.getBalance();
 
 
         // 13. Create transfer record
@@ -233,6 +245,31 @@ public class TransferService {
                 transferRepository.save(
                         transfer
                 );
+
+
+        Transaction senderTransaction =
+                TransactionFactory.create(
+                        senderWallet,
+                        savedTransfer,
+                        TransactionType.DEBIT,
+                        senderBalanceBefore,
+                        senderBalanceAfter,
+                        "Transfer to " + receiverWallet.getUser().getUsername()
+                );
+
+        transactionService.save(senderTransaction);
+
+        Transaction receiverTransaction =
+                TransactionFactory.create(
+                        receiverWallet,
+                        savedTransfer,
+                        TransactionType.CREDIT,
+                        receiverBalanceBefore,
+                        receiverBalanceAfter,
+                        "Transfer from " + sender.getUsername()
+                );
+
+        transactionService.save(receiverTransaction);
 
 
         // 15. Return response
