@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.UUID;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +24,13 @@ public interface TransactionRepository
             Page<Transaction> findByWalletIdOrderByCreatedAtDesc(
                 UUID walletId,
                 Pageable pageable
+            );
+
+            List<Transaction> 
+            findByWalletIdAndCreatedAtBetweenOrderByCreatedAtAsc(
+                UUID walletId,
+                Instant from,
+                Instant to
             );
 
             Optional<Transaction> findByReference(
