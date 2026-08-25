@@ -4,8 +4,12 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import com.nexora.banking.wallet.dto.response.WalletResponse;
+import com.nexora.banking.wallet.entity.Wallet;
+import com.nexora.banking.user.entity.User;
 
 public interface WalletService {
+
+    Wallet createWallet(User user);
 
     WalletResponse getMyWallet(UUID userId);
 

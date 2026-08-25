@@ -39,4 +39,8 @@ public interface WalletRepository
     Optional<Wallet> findByUserIdForUpdate(
             @Param("userId") UUID userId
     );
+
+    Optional<Wallet> findByAccountNumber(
+        String accountNumber
+    );
 }

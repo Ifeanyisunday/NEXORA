@@ -12,6 +12,8 @@ public record WalletResponse(
 
         UUID userId,
 
+        String accountNumber,
+
         BigDecimal balance,
 
         Currency currency,

@@ -12,11 +12,15 @@ public final class WalletFactory {
     private WalletFactory() {
     }
 
-    public static Wallet create(User user) {
+    public static Wallet create(
+        User user,
+        String accountNumber
+    ) {
 
         return Wallet.builder()
                 .user(user)
                 .balance(BigDecimal.ZERO)
+                .accountNumber(accountNumber)
                 .currency(Currency.NGN)
                 .status(WalletStatus.ACTIVE)
                 .build();

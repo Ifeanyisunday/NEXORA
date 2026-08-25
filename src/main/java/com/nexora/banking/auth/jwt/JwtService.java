@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.nexora.banking.auth.config.JwtProperties;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
@@ -20,12 +22,13 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
     @Value("${jwt.secret}")
     private String secret;
 
-    private JwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
 
     /**
      * Generate token without extra claims.

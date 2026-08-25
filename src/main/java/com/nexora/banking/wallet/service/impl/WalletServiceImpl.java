@@ -8,29 +8,40 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.nexora.banking.common.exception.ResourceNotFoundException;
 import com.nexora.banking.user.entity.User;
-import com.nexora.banking.wallet.entity.Wallet;
-import com.nexora.banking.wallet.service.WalletService;
 import com.nexora.banking.wallet.dto.response.WalletResponse;
+import com.nexora.banking.wallet.entity.Wallet;
 import com.nexora.banking.wallet.factory.WalletFactory;
 import com.nexora.banking.wallet.repository.WalletRepository;
+import com.nexora.banking.wallet.service.AccountNumberService;
+import com.nexora.banking.wallet.service.WalletService;
 
 import lombok.RequiredArgsConstructor;
 
-
-@SuppressWarnings("null")
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository walletRepository;
+    private final AccountNumberService accountNumberService;
 
 
-    @Transactional
+    @Override
     public Wallet createWallet(User user) {
-        Wallet wallet = WalletFactory.create(user);
+
+        String accountNumber =
+                accountNumberService.generateAccountNumber();
+
+        Wallet wallet = WalletFactory.create(
+                user,
+                accountNumber
+        );
+
         return walletRepository.save(wallet);
     }
 
+
+    @Override
     @Transactional(readOnly = true)
     public WalletResponse getMyWallet(UUID userId) {
 
@@ -45,7 +56,8 @@ public class WalletServiceImpl implements WalletService {
         return toResponse(wallet);
     }
 
-    @Transactional
+
+    @Override
     public WalletResponse deposit(
             UUID userId,
             BigDecimal amount
@@ -64,7 +76,8 @@ public class WalletServiceImpl implements WalletService {
         return toResponse(wallet);
     }
 
-    @Transactional
+
+    @Override
     public WalletResponse withdraw(
             UUID userId,
             BigDecimal amount
@@ -83,15 +96,16 @@ public class WalletServiceImpl implements WalletService {
         return toResponse(wallet);
     }
 
+
     private WalletResponse toResponse(Wallet wallet) {
 
         return new WalletResponse(
                 wallet.getId(),
                 wallet.getUser().getId(),
+                wallet.getAccountNumber(),
                 wallet.getBalance(),
                 wallet.getCurrency(),
                 wallet.getStatus()
         );
     }
-
 }

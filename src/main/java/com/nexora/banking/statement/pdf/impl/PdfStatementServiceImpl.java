@@ -167,38 +167,38 @@ public class PdfStatementServiceImpl
 
                 transactionYPosition -= 30;
 
-                for (StatementItemResponse item : statement.items()) {
+                for (StatementItemResponse item : statement.transactions()) {
 
-                contentStream.beginText();
+                        contentStream.beginText();
 
-                contentStream.setFont(
-                        new PDType1Font(
-                                Standard14Fonts.FontName.HELVETICA
-                        ),
-                        10
-                );
+                        contentStream.setFont(
+                                new PDType1Font(
+                                        Standard14Fonts.FontName.HELVETICA
+                                ),
+                                10
+                        );
 
-                contentStream.newLineAtOffset(
-                        50,
-                        transactionYPosition
-                );
+                        contentStream.newLineAtOffset(
+                                50,
+                                transactionYPosition
+                        );
 
-                contentStream.showText(
-                        item.date()
-                                + " | "
-                                + item.reference()
-                                + " | "
-                                + item.debit()
-                                + " | "
-                                + item.credit()
-                                + " | "
-                                + item.balance()
-                );
+                        contentStream.showText(
+                                item.date()
+                                        + " | "
+                                        + item.reference()
+                                        + " | "
+                                        + item.debit()
+                                        + " | "
+                                        + item.credit()
+                                        + " | "
+                                        + item.balance()
+                        );
 
-                contentStream.endText();
+                        contentStream.endText();
 
-                transactionYPosition -= 20;
-}
+                        transactionYPosition -= 20;
+                }
             }
 
             document.save(outputStream);

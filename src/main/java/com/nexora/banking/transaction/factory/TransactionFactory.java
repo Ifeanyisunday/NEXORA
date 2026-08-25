@@ -8,6 +8,7 @@ import com.nexora.banking.transfer.entity.Transfer;
 import com.nexora.banking.wallet.entity.Wallet;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public final class TransactionFactory {
 
@@ -38,11 +39,14 @@ public final class TransactionFactory {
                 .amount(transfer.getAmount())
                 .balanceBefore(balanceBefore)
                 .balanceAfter(balanceAfter)
-                .reference(transfer.getReference())
+                .reference(generateTransactionReference())
                 .description(description)
                 .status(TransactionStatus.COMPLETED)
                 .build();
+    }
 
+    private static String generateTransactionReference() {
+        return "TXN-" + UUID.randomUUID();
     }
     
 

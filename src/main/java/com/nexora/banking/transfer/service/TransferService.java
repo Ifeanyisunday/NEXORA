@@ -58,8 +58,19 @@ public class TransferService {
         }
 
         UUID senderId = sender.getId();
-        UUID receiverId = request.receiverId();
 
+        Wallet destinationWallet = walletRepository
+        .findByAccountNumber(
+                request.accountNumber()
+        )
+        .orElseThrow(
+                () -> new WalletNotFoundException(
+                        "Wallet not found."
+                )
+        );
+
+        UUID receiverId =
+                destinationWallet.getUser().getId();
         // 2. Prevent self-transfer
 
         if (senderId.equals(receiverId)) {
