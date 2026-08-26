@@ -27,7 +27,7 @@ import com.nexora.banking.user.enums.UserStatus;
 import com.nexora.banking.user.mapper.UserMapper;
 import com.nexora.banking.user.repository.UserRepository;
 import com.nexora.banking.user.service.impl.UserServiceImpl;
-import com.nexora.banking.wallet.service.impl.WalletServiceImpl;
+import com.nexora.banking.wallet.service.WalletServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {

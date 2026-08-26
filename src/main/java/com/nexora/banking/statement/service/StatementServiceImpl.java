@@ -1,9 +1,8 @@
-package com.nexora.banking.statement.service.impl;
+package com.nexora.banking.statement.service;
 
 import com.nexora.banking.common.exception.WalletNotFoundException;
 import com.nexora.banking.statement.dto.response.StatementItemResponse;
 import com.nexora.banking.statement.dto.response.StatementResponse;
-import com.nexora.banking.statement.service.StatementService;
 import com.nexora.banking.transaction.entity.Transaction;
 import com.nexora.banking.transaction.enums.TransactionType;
 import com.nexora.banking.transaction.repository.TransactionRepository;

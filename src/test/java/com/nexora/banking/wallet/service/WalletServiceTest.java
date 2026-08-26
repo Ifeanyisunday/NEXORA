@@ -22,7 +22,6 @@ import com.nexora.banking.wallet.dto.response.WalletResponse;
 import com.nexora.banking.wallet.entity.Wallet;
 import com.nexora.banking.wallet.enums.Currency;
 import com.nexora.banking.wallet.enums.WalletStatus;
-import com.nexora.banking.wallet.service.impl.WalletServiceImpl;
 import com.nexora.banking.wallet.repository.WalletRepository;
 
 @ExtendWith(MockitoExtension.class)

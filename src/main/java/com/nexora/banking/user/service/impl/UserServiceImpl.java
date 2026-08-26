@@ -8,7 +8,7 @@ import com.nexora.banking.common.exception.EmailAlreadyExistsException;
 import com.nexora.banking.user.mapper.UserMapper;
 import com.nexora.banking.user.repository.UserRepository;
 import com.nexora.banking.user.service.UserService;
-import com.nexora.banking.wallet.service.impl.WalletServiceImpl;
+import com.nexora.banking.wallet.service.WalletServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

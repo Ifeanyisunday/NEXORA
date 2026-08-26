@@ -1,4 +1,4 @@
-package com.nexora.banking.wallet.service.impl;
+package com.nexora.banking.wallet.service;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -12,8 +12,6 @@ import com.nexora.banking.wallet.dto.response.WalletResponse;
 import com.nexora.banking.wallet.entity.Wallet;
 import com.nexora.banking.wallet.factory.WalletFactory;
 import com.nexora.banking.wallet.repository.WalletRepository;
-import com.nexora.banking.wallet.service.AccountNumberService;
-import com.nexora.banking.wallet.service.WalletService;
 
 import lombok.RequiredArgsConstructor;
 

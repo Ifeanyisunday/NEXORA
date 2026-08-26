@@ -1,6 +1,5 @@
-package com.nexora.banking.wallet.service.impl;
+package com.nexora.banking.wallet.service;
 
-import com.nexora.banking.wallet.service.AccountNumberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;

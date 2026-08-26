@@ -1,8 +1,7 @@
-package com.nexora.banking.statement.pdf.impl;
+package com.nexora.banking.statement.pdf;
 
 import com.nexora.banking.statement.dto.response.StatementItemResponse;
 import com.nexora.banking.statement.dto.response.StatementResponse;
-import com.nexora.banking.statement.pdf.PdfStatementService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

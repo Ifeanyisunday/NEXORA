@@ -1,8 +1,8 @@
 package com.nexora.banking.statement.controller;
 
 import com.nexora.banking.statement.dto.response.StatementResponse;
+import com.nexora.banking.statement.pdf.PdfStatementServiceImpl;
 import com.nexora.banking.statement.service.StatementService;
-import com.nexora.banking.statement.pdf.impl.PdfStatementServiceImpl;
 import com.nexora.banking.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
