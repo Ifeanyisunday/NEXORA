@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.nexora.banking.common.exception.InsufficientBalanceException;
 import com.nexora.banking.common.exception.ResourceNotFoundException;
 import com.nexora.banking.user.entity.User;
 import com.nexora.banking.wallet.dto.response.WalletResponse;
@@ -173,7 +174,7 @@ class WalletServiceTest {
                         new BigDecimal("1500.00")
                 )
         )
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(InsufficientBalanceException.class)
                 .hasMessage("Insufficient balance.");
 
         // Balance must remain unchanged
