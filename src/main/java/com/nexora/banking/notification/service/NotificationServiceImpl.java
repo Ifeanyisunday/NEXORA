@@ -22,7 +22,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserRepository userRepository;
 
     @Override
-    public Notification create(
+    public Notification createNotification(
             User user,
             NotificationType type,
             String title,
@@ -39,6 +39,7 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationRepository.save(notification);
     }
 
+    
     @Override
     @Transactional(readOnly = true)
     public List<Notification> getMyNotifications(UUID userId) {

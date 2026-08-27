@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface NotificationService {
 
-    Notification create(
+    Notification createNotification(
             User user,
             NotificationType type,
             String title,

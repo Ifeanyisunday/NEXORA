@@ -15,14 +15,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.nexora.banking.notification.enums.NotificationType;
+import com.nexora.banking.notification.service.NotificationService;
+
 import com.nexora.banking.common.exception.SelfTransferException;
 import com.nexora.banking.common.exception.WalletNotActiveException;
 import com.nexora.banking.common.exception.WalletNotFoundException;
-import com.nexora.banking.transaction.enums.TransactionCategory;
 import com.nexora.banking.transaction.enums.TransactionType;
 import com.nexora.banking.transaction.entity.Transaction;
-import com.nexora.banking.transaction.enums.TransactionStatus;
-import com.nexora.banking.transaction.repository.TransactionRepository;
 import com.nexora.banking.transaction.service.TransactionService;
 import com.nexora.banking.transaction.factory.TransactionFactory;
 
@@ -40,6 +40,7 @@ public class TransferService {
     private final TransferRepository transferRepository;
     private final TransferMapper transferMapper;
     private final TransactionService transactionService;
+    private final NotificationService notificationService;
 
 
     @Transactional
@@ -282,8 +283,29 @@ public class TransferService {
 
         transactionService.save(receiverTransaction);
 
+        // 15. Send notifications
+        notificationService.createNotification(
+        sender,
+        NotificationType.TRANSFER_SENT,
+        "Transfer Sent",
+        "You successfully transferred " +
+                request.amount() +
+                " to " +
+                receiverWallet.getUser().getUsername()
+        );
 
-        // 15. Return response
+        notificationService.createNotification(
+                receiverWallet.getUser(),
+                NotificationType.TRANSFER_RECEIVED,
+                "Transfer Received",
+                "You received " +
+                        request.amount() +
+                        " from " +
+                        sender.getUsername()
+        );
+
+
+        // 16. Return response
 
         return transferMapper.toResponse(
                 savedTransfer
