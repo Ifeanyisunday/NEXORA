@@ -1,52 +1,100 @@
 package com.nexora.banking.notification.service;
 
-import com.nexora.banking.common.exception.ResourceNotFoundException;
 import com.nexora.banking.notification.entity.Notification;
 import com.nexora.banking.notification.enums.NotificationType;
 import com.nexora.banking.notification.repository.NotificationRepository;
+import com.nexora.banking.transfer.event.TransferCompletedEvent;
 import com.nexora.banking.user.entity.User;
 import com.nexora.banking.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
-public class NotificationServiceImpl implements NotificationService {
+@Slf4j
+public class NotificationServiceImpl
+        implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
     @Override
-    public Notification create(
-            User user,
-            NotificationType type,
-            String title,
-            String message
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void createTransferNotifications(
+            TransferCompletedEvent event
     ) {
 
-        Notification notification = Notification.builder()
-                .user(user)
-                .type(type)
-                .title(title)
-                .message(message)
-                .build();
+        log.info(
+                "Creating notifications for transferId={}",
+                event.transferId()
+        );
 
-        return notificationRepository.save(notification);
-    }
+        User sender = userRepository
+                .findById(event.senderId())
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "Sender not found."
+                        )
+                );
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<Notification> getMyNotifications(UUID userId) {
+        User receiver = userRepository
+                .findById(event.receiverId())
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "Receiver not found."
+                        )
+                );
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        log.info(
+                "Sender and receiver found. sender={}, receiver={}",
+                sender.getUsername(),
+                receiver.getUsername()
+        );
 
-        return notificationRepository
-                .findByUserOrderByCreatedAtDesc(user);
+        Notification senderNotification =
+                Notification.builder()
+                        .user(sender)
+                        .type(NotificationType.TRANSFER_SENT)
+                        .title("Transfer Successful")
+                        .message(
+                                "You successfully transferred "
+                                        + event.amount()
+                                        + " to "
+                                        + receiver.getUsername()
+                        )
+                        .build();
+
+        Notification receiverNotification =
+                Notification.builder()
+                        .user(receiver)
+                        .type(NotificationType.TRANSFER_RECEIVED)
+                        .title("Money Received")
+                        .message(
+                                "You received "
+                                        + event.amount()
+                                        + " from "
+                                        + sender.getUsername()
+                        )
+                        .build();
+        log.info("Saving sender notification");
+
+        notificationRepository.saveAndFlush(
+                senderNotification
+        );
+
+        log.info("Saving receiver notification");
+
+        notificationRepository.saveAndFlush(
+                receiverNotification
+        );
+
+        log.info(
+                "Notifications created successfully for transferId={}",
+                event.transferId()
+        );
     }
 }
