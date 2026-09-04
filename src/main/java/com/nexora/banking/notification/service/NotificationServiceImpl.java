@@ -58,6 +58,7 @@ public class NotificationServiceImpl
         Notification senderNotification =
                 Notification.builder()
                         .user(sender)
+                        .transferId(event.transferId())
                         .type(NotificationType.TRANSFER_SENT)
                         .title("Transfer Successful")
                         .message(
@@ -71,6 +72,7 @@ public class NotificationServiceImpl
         Notification receiverNotification =
                 Notification.builder()
                         .user(receiver)
+                        .transferId(event.transferId())
                         .type(NotificationType.TRANSFER_RECEIVED)
                         .title("Money Received")
                         .message(

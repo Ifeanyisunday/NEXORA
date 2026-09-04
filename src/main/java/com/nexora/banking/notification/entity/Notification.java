@@ -15,6 +15,20 @@ import java.util.UUID;
                 @Index(
                         name = "idx_notification_user_created",
                         columnList = "user_id, created_at"
+                ),
+                @Index(
+                        name = "idx_notification_transfer",
+                        columnList = "transfer_id"
+                )
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_notification_transfer_user_type",
+                        columnNames = {
+                                "transfer_id",
+                                "user_id",
+                                "type"
+                        }
                 )
         }
 )
@@ -35,6 +49,12 @@ public class Notification {
             nullable = false
     )
     private User user;
+
+    @Column(
+            name = "transfer_id",
+            nullable = false
+    )
+    private UUID transferId;
 
     @Enumerated(EnumType.STRING)
     @Column(
