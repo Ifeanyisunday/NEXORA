@@ -222,4 +222,28 @@ public class GlobalExceptionHandler {
                 .status(status)
                 .body(response);
         }
+
+
+        @ExceptionHandler(NotificationNotFoundException.class)
+        public ResponseEntity<ApiErrorResponse> handleNotificationNotFound(
+                NotificationNotFoundException ex,
+                HttpServletRequest request
+        ) {
+
+        HttpStatus status = HttpStatus.NOT_FOUND;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "NOTIFICATION_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
+
 }

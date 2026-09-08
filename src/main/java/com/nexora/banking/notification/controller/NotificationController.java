@@ -1,5 +1,7 @@
 package com.nexora.banking.notification.controller;
 
+import com.nexora.banking.common.response.PageResponse;
+
 import com.nexora.banking.notification.dto.response.NotificationResponse;
 import com.nexora.banking.notification.service.NotificationService;
 import com.nexora.banking.user.entity.User;
@@ -7,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,23 +29,23 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping
-    public Page<NotificationResponse> getNotifications(
+    public PageResponse<NotificationResponse> getNotifications(
             @AuthenticationPrincipal User currentUser,
-
-             @RequestParam(defaultValue = "0")
-            int page,
-
-            @RequestParam(defaultValue = "20")
-            int size
+            @RequestParam(defaultValue = "0")int page,
+            @RequestParam(defaultValue = "20")int size
     ) {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return notificationService.getUserNotifications(
-                currentUser.getId(),
-                pageable
-        );
+        Page<NotificationResponse> notifications =
+            notificationService.getUserNotifications(
+                    currentUser.getId(),
+                    pageable
+            );
+
+        return PageResponse.from(notifications);
     }
+    
 
     @PatchMapping("/{notificationId}/read")
     @ResponseStatus(HttpStatus.NO_CONTENT)
