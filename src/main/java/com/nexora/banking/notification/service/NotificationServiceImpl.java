@@ -3,6 +3,8 @@ package com.nexora.banking.notification.service;
 import com.nexora.banking.notification.entity.Notification;
 import com.nexora.banking.notification.enums.NotificationType;
 import com.nexora.banking.notification.repository.NotificationRepository;
+import com.nexora.banking.notification.mapper.NotificationMapper;
+import com.nexora.banking.notification.dto.response.NotificationResponse;
 import com.nexora.banking.transfer.event.TransferCompletedEvent;
 import com.nexora.banking.user.entity.User;
 import com.nexora.banking.user.repository.UserRepository;
@@ -11,6 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.nexora.banking.common.exception.NotificationNotFoundException;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.UUID;
 
 
 @Service
@@ -21,6 +30,7 @@ public class NotificationServiceImpl
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final NotificationMapper notificationMapper;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -99,4 +109,36 @@ public class NotificationServiceImpl
                 event.transferId()
         );
     }
+
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<NotificationResponse> getUserNotifications(
+                UUID userId,
+                Pageable pageable
+        ) {
+
+        return notificationRepository
+                .findByUserIdOrderByCreatedAtDesc(userId, pageable)
+                .map(notificationMapper::toResponse);
+        }
+
+        @Override
+        @Transactional
+        public void markAsRead(
+                UUID userId,
+                UUID notificationId
+        ) {
+
+        int updatedRows = notificationRepository.markAsRead(
+                notificationId,
+                userId
+        );
+
+        if (updatedRows == 0) {
+                throw new NotificationNotFoundException(
+                        "Notification not found."
+                );
+        }
+        }
 }

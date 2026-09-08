@@ -4,8 +4,10 @@ import com.nexora.banking.notification.entity.Notification;
 import com.nexora.banking.notification.enums.NotificationType;
 import com.nexora.banking.transfer.event.TransferCompletedEvent;
 import com.nexora.banking.user.entity.User;
+import com.nexora.banking.notification.dto.response.NotificationResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface NotificationService {
@@ -14,5 +16,13 @@ public interface NotificationService {
             TransferCompletedEvent event
     );
 
-    // List<Notification> getMyNotifications(UUID userId);
+    Page<NotificationResponse> getUserNotifications(
+        UUID userId,
+        Pageable pageable
+    );
+
+    void markAsRead(
+        UUID userId,
+        UUID notificationId
+    );
 }
