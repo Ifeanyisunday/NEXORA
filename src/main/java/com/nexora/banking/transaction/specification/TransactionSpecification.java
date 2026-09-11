@@ -9,6 +9,7 @@ import java.util.UUID;
 public final class TransactionSpecification {
 
     private TransactionSpecification() {
+        
     }
 
     public static Specification<Transaction> filter(
