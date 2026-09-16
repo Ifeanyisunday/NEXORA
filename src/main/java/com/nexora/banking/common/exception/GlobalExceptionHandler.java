@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.nexora.banking.transaction.exception.InvalidTransactionFilterException;
+import com.nexora.banking.transaction.exception.InvalidPaginationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -237,6 +239,50 @@ public class GlobalExceptionHandler {
                 status.value(),
                 status.getReasonPhrase(),
                 "NOTIFICATION_NOT_FOUND",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
+
+
+        @ExceptionHandler(InvalidTransactionFilterException.class)
+        public ResponseEntity<ApiErrorResponse> handleInvalidTransactionFilter(
+                InvalidTransactionFilterException ex,
+                HttpServletRequest request
+        ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "INVALID_TRANSACTION_FILTER",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
+
+
+        @ExceptionHandler(InvalidPaginationException.class)
+        public ResponseEntity<ApiErrorResponse> handleInvalidPagination(
+                InvalidPaginationException ex,
+                HttpServletRequest request
+        ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "INVALID_PAGINATION",
                 ex.getMessage(),
                 request.getRequestURI()
         );
