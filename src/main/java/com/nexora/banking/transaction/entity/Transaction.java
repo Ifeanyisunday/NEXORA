@@ -28,6 +28,10 @@ import java.math.BigDecimal;
                 @Index(
                         name = "idx_transaction_created_at",
                         columnList = "created_at"
+                ),
+                @Index(
+                        name = "idx_transaction_wallet_created_id",
+                        columnList = "wallet_id, created_at, id"
                 )
         }
 )
