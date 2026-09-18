@@ -76,31 +76,39 @@ public final class TransactionSpecification {
     }
 
     private static Specification<Transaction> createdAfter(
-            java.time.Instant from
+            java.time.LocalDate from
     ) {
 
         if (from == null)
             return null;
 
+        java.time.Instant fromInstant =
+            from.atStartOfDay(java.time.ZoneOffset.UTC).toInstant();
+
         return (root, query, cb) ->
                 cb.greaterThanOrEqualTo(
                         root.get("createdAt"),
-                        from
+                        fromInstant
                 );
 
     }
 
     private static Specification<Transaction> createdBefore(
-            java.time.Instant to
+            java.time.LocalDate to
     ) {
 
         if (to == null)
             return null;
 
+        java.time.Instant toInstant =
+            to.plusDays(1)
+              .atStartOfDay(java.time.ZoneOffset.UTC)
+              .toInstant();
+
         return (root, query, cb) ->
                 cb.lessThanOrEqualTo(
                         root.get("createdAt"),
-                        to
+                        toInstant
                 );
 
     }

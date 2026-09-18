@@ -7,6 +7,7 @@ import jakarta.validation.constraints.DecimalMin;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 public record TransactionFilterRequest(
 
@@ -16,9 +17,9 @@ public record TransactionFilterRequest(
 
         TransactionStatus status,
 
-        Instant from,
+        LocalDate from,
 
-        Instant to,
+        LocalDate to,
 
         @DecimalMin(
                 value = "0.00",
