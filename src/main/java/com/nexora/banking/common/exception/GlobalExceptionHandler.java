@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.nexora.banking.transaction.exception.InvalidTransactionFilterException;
 import com.nexora.banking.transaction.exception.InvalidPaginationException;
-
+import com.nexora.banking.statement.exception.InvalidStatementDateException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -49,9 +49,7 @@ public class GlobalExceptionHandler {
                 EmailAlreadyExistsException ex,
                 HttpServletRequest request
         ) {
-
         HttpStatus status = HttpStatus.CONFLICT;
-
         ApiErrorResponse response = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -60,7 +58,6 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity
                 .status(status)
                 .body(response);
@@ -72,9 +69,7 @@ public class GlobalExceptionHandler {
                 InvalidCredentialsException ex,
                 HttpServletRequest request
         ) {
-
         HttpStatus status = HttpStatus.UNAUTHORIZED;
-
         ApiErrorResponse response = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -83,7 +78,6 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity
                 .status(status)
                 .body(response);
@@ -95,9 +89,7 @@ public class GlobalExceptionHandler {
                 ResourceNotFoundException ex,
                 HttpServletRequest request
         ) {
-
         HttpStatus status = HttpStatus.NOT_FOUND;
-
         ApiErrorResponse response = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -106,20 +98,18 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity
                 .status(status)
                 .body(response);
         }
+
 
         @ExceptionHandler(IdempotencyKeyConflictException.class)
         public ResponseEntity<ApiErrorResponse> handleIdempotencyKeyConflict(
                 IdempotencyKeyConflictException ex,
                 HttpServletRequest request
         ) {
-
         HttpStatus status = HttpStatus.CONFLICT;
-
         ApiErrorResponse response = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -128,7 +118,6 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity
                 .status(status)
                 .body(response);
@@ -140,9 +129,7 @@ public class GlobalExceptionHandler {
                 SelfTransferException ex,
                 HttpServletRequest request
         ) {
-
         HttpStatus status = HttpStatus.BAD_REQUEST;
-
         ApiErrorResponse response = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -151,7 +138,6 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity
                 .status(status)
                 .body(response);
@@ -163,9 +149,7 @@ public class GlobalExceptionHandler {
                 WalletNotFoundException ex,
                 HttpServletRequest request
         ) {
-
         HttpStatus status = HttpStatus.NOT_FOUND;
-
         ApiErrorResponse response = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -174,7 +158,6 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity
                 .status(status)
                 .body(response);
@@ -186,9 +169,7 @@ public class GlobalExceptionHandler {
                 WalletNotActiveException ex,
                 HttpServletRequest request
         ) {
-
         HttpStatus status = HttpStatus.CONFLICT;
-
         ApiErrorResponse response = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -197,20 +178,18 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity
                 .status(status)
                 .body(response);
         }
+
 
         @ExceptionHandler(InsufficientBalanceException.class)
         public ResponseEntity<ApiErrorResponse> handleInsufficientBalance(
                 InsufficientBalanceException ex,
                 HttpServletRequest request
         ) {
-
         HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
-
         ApiErrorResponse response = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -219,7 +198,6 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity
                 .status(status)
                 .body(response);
@@ -231,9 +209,7 @@ public class GlobalExceptionHandler {
                 NotificationNotFoundException ex,
                 HttpServletRequest request
         ) {
-
         HttpStatus status = HttpStatus.NOT_FOUND;
-
         ApiErrorResponse response = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -242,7 +218,6 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity
                 .status(status)
                 .body(response);
@@ -255,7 +230,6 @@ public class GlobalExceptionHandler {
                 HttpServletRequest request
         ) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
-
         ApiErrorResponse response = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -264,7 +238,6 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
-
         return ResponseEntity
                 .status(status)
                 .body(response);
@@ -277,7 +250,6 @@ public class GlobalExceptionHandler {
                 HttpServletRequest request
         ) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
-
         ApiErrorResponse response = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -286,7 +258,26 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
 
+
+        @ExceptionHandler(InvalidStatementDateException.class)
+        public ResponseEntity<ApiErrorResponse> handleInvalidStatementDate(
+                InvalidStatementDateException ex,
+                HttpServletRequest request
+        ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "INVALID_STATEMENT_DATE",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
         return ResponseEntity
                 .status(status)
                 .body(response);
