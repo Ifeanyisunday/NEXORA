@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.nexora.banking.transaction.exception.InvalidTransactionFilterException;
 import com.nexora.banking.transaction.exception.InvalidPaginationException;
 import com.nexora.banking.statement.exception.InvalidStatementDateException;
+import com.nexora.banking.statement.exception.StatementIntegrityException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -275,6 +276,26 @@ public class GlobalExceptionHandler {
                 status.value(),
                 status.getReasonPhrase(),
                 "INVALID_STATEMENT_DATE",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
+
+
+        @ExceptionHandler(StatementIntegrityException.class)
+        public ResponseEntity<ApiErrorResponse> handleStatementIntegrity(
+                StatementIntegrityException ex,
+                HttpServletRequest request
+        ) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "STATEMENT_INTEGRITY_ERROR",
                 ex.getMessage(),
                 request.getRequestURI()
         );

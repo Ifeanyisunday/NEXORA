@@ -24,10 +24,9 @@ public class AuthenticationService {
 
     private final JwtProperties jwtProperties;
 
+
     public LoginResponse login(LoginRequest request) {
-
          try {
-
             Authentication authentication =
                     authenticationManager.authenticate(
                             new UsernamePasswordAuthenticationToken(
@@ -35,11 +34,8 @@ public class AuthenticationService {
                                     request.password()
                             )
                     );
-
             User user = (User) authentication.getPrincipal();
-
             String token = jwtService.generateToken(user);
-
             return new LoginResponse(
                     token,
                     "Bearer",
@@ -47,10 +43,8 @@ public class AuthenticationService {
                     user.getEmail(),
                     user.getRole().name()
             );
-
         } catch (AuthenticationException ex) {
             throw new InvalidCredentialsException();
-
         }
     }
 

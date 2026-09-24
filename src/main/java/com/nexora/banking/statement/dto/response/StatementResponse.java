@@ -2,6 +2,7 @@ package com.nexora.banking.statement.dto.response;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 public record StatementResponse(
@@ -10,9 +11,9 @@ public record StatementResponse(
 
         Instant generatedAt,
 
-        Instant from,
+        LocalDate from,
 
-        Instant to,
+        LocalDate to,
 
         BigDecimal openingBalance,
 

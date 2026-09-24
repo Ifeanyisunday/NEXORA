@@ -4,6 +4,7 @@ import com.nexora.banking.common.exception.WalletNotFoundException;
 import com.nexora.banking.statement.dto.response.StatementItemResponse;
 import com.nexora.banking.statement.dto.response.StatementResponse;
 import com.nexora.banking.statement.validator.StatementDateValidator;
+import com.nexora.banking.statement.validator.StatementIntegrityValidator;
 
 import com.nexora.banking.transaction.entity.Transaction;
 import com.nexora.banking.transaction.enums.TransactionType;
@@ -29,6 +30,7 @@ public class StatementServiceImpl implements StatementService {
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
     private final StatementDateValidator statementDateValidator;
+    private final StatementIntegrityValidator statementIntegrityValidator;
 
     @Override
     @Transactional(readOnly = true)
@@ -164,19 +166,15 @@ public class StatementServiceImpl implements StatementService {
         BigDecimal totalDebits = BigDecimal.ZERO;
 
         for (Transaction transaction : transactions) {
-
             if (transaction.getType() == TransactionType.CREDIT) {
-
                 totalCredits =
                         totalCredits.add(
                                 transaction.getAmount()
                         );
-
             } else if (
                     transaction.getType()
                             == TransactionType.DEBIT
             ) {
-
                 totalDebits =
                         totalDebits.add(
                                 transaction.getAmount()
@@ -184,33 +182,38 @@ public class StatementServiceImpl implements StatementService {
             }
         }
 
+        /*  Validate statement integrity. This ensures that the opening balance, 
+        total credits, total debits, and closing balance are consistent with each other. 
+        If they are not, an exception will be thrown. */
+        statementIntegrityValidator.validate(
+                openingBalance,
+                totalCredits,
+                totalDebits,
+                closingBalance
+        );
+
+        
         /*
          * Convert ledger transactions into statement rows.
          */
         List<StatementItemResponse> items =
                 transactions.stream()
                         .map(transaction -> {
-
                             BigDecimal debit = BigDecimal.ZERO;
                             BigDecimal credit = BigDecimal.ZERO;
-
                             if (
                                     transaction.getType()
                                             == TransactionType.DEBIT
                             ) {
-
                                 debit =
                                         transaction.getAmount();
-
                             } else if (
                                     transaction.getType()
                                             == TransactionType.CREDIT
                             ) {
-
                                 credit =
                                         transaction.getAmount();
                             }
-
                             return new StatementItemResponse(
                                     transaction.getCreatedAt(),
                                     transaction.getReference(),
@@ -225,8 +228,8 @@ public class StatementServiceImpl implements StatementService {
         return new StatementResponse(
                 generateStatementReference(),
                 Instant.now(),
-                startDate,
-                endDate,
+                from,
+                to,
                 openingBalance,
                 closingBalance,
                 totalCredits,
