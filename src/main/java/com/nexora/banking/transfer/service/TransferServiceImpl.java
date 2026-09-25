@@ -1,8 +1,8 @@
 package com.nexora.banking.transfer.service;
 
-import com.nexora.banking.common.exception.IdempotencyKeyConflictException;
-import com.nexora.banking.common.exception.SelfTransferException;
-import com.nexora.banking.common.exception.WalletNotActiveException;
+import com.nexora.banking.transfer.exception.IdempotencyKeyConflictException;
+import com.nexora.banking.transfer.exception.SelfTransferException;
+import com.nexora.banking.transfer.exception.WalletNotActiveException;
 import com.nexora.banking.common.exception.WalletNotFoundException;
 
 import com.nexora.banking.transfer.dto.request.TransferRequest;

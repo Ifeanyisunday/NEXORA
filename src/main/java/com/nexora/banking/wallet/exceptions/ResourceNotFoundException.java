@@ -1,4 +1,4 @@
-package com.nexora.banking.common.exception;
+package com.nexora.banking.wallet.exceptions;
 
 public class ResourceNotFoundException
         extends RuntimeException {

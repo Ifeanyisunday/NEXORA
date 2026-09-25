@@ -1,4 +1,4 @@
-package com.nexora.banking.common.exception;
+package com.nexora.banking.user.exception;
 
 public class EmailAlreadyExistsException extends RuntimeException{
 

@@ -4,7 +4,7 @@ import com.nexora.banking.user.dto.request.RegisterUserRequest;
 import com.nexora.banking.user.dto.response.UserResponse;
 import com.nexora.banking.user.entity.User;
 import com.nexora.banking.user.enums.UserStatus;
-import com.nexora.banking.common.exception.EmailAlreadyExistsException;
+import com.nexora.banking.user.exception.EmailAlreadyExistsException;
 import com.nexora.banking.user.mapper.UserMapper;
 import com.nexora.banking.user.repository.UserRepository;
 import com.nexora.banking.wallet.service.WalletServiceImpl;

@@ -1,4 +1,4 @@
-package com.nexora.banking.common.exception;
+package com.nexora.banking.notification.exception;
 
 public class NotificationNotFoundException
         extends RuntimeException {

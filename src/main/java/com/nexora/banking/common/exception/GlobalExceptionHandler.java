@@ -8,6 +8,13 @@ import java.time.Instant;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import com.nexora.banking.user.exception.EmailAlreadyExistsException;
+import com.nexora.banking.transfer.exception.IdempotencyKeyConflictException;
+import com.nexora.banking.transfer.exception.SelfTransferException;
+import com.nexora.banking.transfer.exception.WalletNotActiveException;
+import com.nexora.banking.notification.exception.NotificationNotFoundException;
+import com.nexora.banking.wallet.exceptions.ResourceNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

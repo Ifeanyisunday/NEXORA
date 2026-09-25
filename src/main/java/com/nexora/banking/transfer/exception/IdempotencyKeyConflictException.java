@@ -1,4 +1,4 @@
-package com.nexora.banking.common.exception;
+package com.nexora.banking.transfer.exception;
 
 public class IdempotencyKeyConflictException
         extends RuntimeException {

@@ -5,8 +5,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.nexora.banking.common.exception.ResourceNotFoundException;
+import com.nexora.banking.wallet.exceptions.ResourceNotFoundException;
 import com.nexora.banking.user.entity.User;
 import com.nexora.banking.wallet.dto.response.WalletResponse;
 import com.nexora.banking.wallet.entity.Wallet;
@@ -42,7 +41,6 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional(readOnly = true)
     public WalletResponse getMyWallet(UUID userId) {
-
         Wallet wallet = walletRepository
                 .findByUserId(userId)
                 .orElseThrow(() ->
@@ -50,7 +48,6 @@ public class WalletServiceImpl implements WalletService {
                                 "Wallet not found."
                         )
                 );
-
         return toResponse(wallet);
     }
 
