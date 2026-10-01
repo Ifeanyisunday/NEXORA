@@ -5,6 +5,9 @@ import com.nexora.banking.statement.dto.response.StatementItemResponse;
 import com.nexora.banking.statement.dto.response.StatementResponse;
 import com.nexora.banking.statement.validator.StatementDateValidator;
 import com.nexora.banking.statement.validator.StatementIntegrityValidator;
+import com.nexora.banking.statement.validator.StatementLedgerContinuityValidator;
+import com.nexora.banking.statement.validator.TransactionBalanceValidator;
+import com.nexora.banking.statement.validator.StatementOpeningBalanceValidator;
 
 import com.nexora.banking.transaction.entity.Transaction;
 import com.nexora.banking.transaction.enums.TransactionType;
@@ -31,6 +34,9 @@ public class StatementServiceImpl implements StatementService {
     private final TransactionRepository transactionRepository;
     private final StatementDateValidator statementDateValidator;
     private final StatementIntegrityValidator statementIntegrityValidator;
+    private final StatementLedgerContinuityValidator statementLedgerContinuityValidator;
+    private final TransactionBalanceValidator transactionBalanceValidator;
+    private final StatementOpeningBalanceValidator statementOpeningBalanceValidator;
 
     @Override
     @Transactional(readOnly = true)
@@ -85,6 +91,7 @@ public class StatementServiceImpl implements StatementService {
                         startDate,
                         endDate
                 );
+	transactions.forEach(transactionBalanceValidator::validate);
 
         /*
          * Find the most recent transaction BEFORE
@@ -104,12 +111,9 @@ public class StatementServiceImpl implements StatementService {
         BigDecimal openingBalance;
 
         if (previousTransaction != null) {
-
             openingBalance =
                     previousTransaction.getBalanceAfter();
-
         } else if (!transactions.isEmpty()) {
-
             /*
              * There is no transaction before the statement,
              * so the first transaction's balanceBefore is
@@ -117,9 +121,7 @@ public class StatementServiceImpl implements StatementService {
              */
             openingBalance =
                     transactions.get(0).getBalanceBefore();
-
         } else {
-
             /*
              * No transaction exists before or during the
              * statement period.
@@ -133,6 +135,13 @@ public class StatementServiceImpl implements StatementService {
             openingBalance =
                     wallet.getBalance();
         }
+
+        statementOpeningBalanceValidator.validate(
+                openingBalance,
+                transactions.isEmpty()
+                        ? null
+                        : transactions.get(0)
+        );
 
         /*
          * Closing balance.
@@ -181,6 +190,8 @@ public class StatementServiceImpl implements StatementService {
                         );
             }
         }
+
+        statementLedgerContinuityValidator.validate(transactions);
 
         /*  Validate statement integrity. This ensures that the opening balance, 
         total credits, total debits, and closing balance are consistent with each other. 
