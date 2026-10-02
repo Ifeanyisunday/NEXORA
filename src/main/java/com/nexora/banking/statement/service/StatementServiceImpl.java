@@ -1,6 +1,6 @@
 package com.nexora.banking.statement.service;
 
-import com.nexora.banking.common.exception.WalletNotFoundException;
+import com.nexora.banking.wallet.exceptions.WalletNotFoundException;
 import com.nexora.banking.statement.dto.response.StatementItemResponse;
 import com.nexora.banking.statement.dto.response.StatementResponse;
 import com.nexora.banking.statement.validator.StatementDateValidator;

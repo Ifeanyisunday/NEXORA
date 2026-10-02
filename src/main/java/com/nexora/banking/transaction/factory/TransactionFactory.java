@@ -16,27 +16,42 @@ public final class TransactionFactory {
     }
 
     public static Transaction create(
-
             Wallet wallet,
-
-            Transfer transfer,
-
             TransactionType type,
-
+            TransactionCategory category,
+            BigDecimal amount,
             BigDecimal balanceBefore,
-
             BigDecimal balanceAfter,
-
             String description
-
     ) {
+        return create(
+                wallet,
+                null,
+                type,
+                category,
+                amount,
+                balanceBefore,
+                balanceAfter,
+                description
+        );
+    }
 
+    public static Transaction create(
+            Wallet wallet,
+            Transfer transfer,
+            TransactionType type,
+            TransactionCategory category,
+            BigDecimal amount,
+            BigDecimal balanceBefore,
+            BigDecimal balanceAfter,
+            String description
+    ) {
         return Transaction.builder()
                 .wallet(wallet)
                 .transfer(transfer)
                 .type(type)
-                .category(TransactionCategory.TRANSFER)
-                .amount(transfer.getAmount())
+                .category(category)
+                .amount(amount)
                 .balanceBefore(balanceBefore)
                 .balanceAfter(balanceAfter)
                 .reference(generateTransactionReference())
@@ -48,6 +63,4 @@ public final class TransactionFactory {
     private static String generateTransactionReference() {
         return "TXN-" + UUID.randomUUID();
     }
-    
-
 }

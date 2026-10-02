@@ -13,6 +13,7 @@ import com.nexora.banking.user.exception.EmailAlreadyExistsException;
 import com.nexora.banking.transfer.exception.IdempotencyKeyConflictException;
 import com.nexora.banking.transfer.exception.SelfTransferException;
 import com.nexora.banking.transfer.exception.WalletNotActiveException;
+import com.nexora.banking.wallet.exceptions.WalletNotFoundException;
 import com.nexora.banking.notification.exception.NotificationNotFoundException;
 import com.nexora.banking.wallet.exceptions.ResourceNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;

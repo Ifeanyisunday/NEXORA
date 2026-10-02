@@ -12,12 +12,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.nexora.banking.wallet.exceptions.ResourceNotFoundException;
 import com.nexora.banking.common.exception.InsufficientBalanceException;
+import com.nexora.banking.wallet.exceptions.WalletNotFoundException;
+import com.nexora.banking.transaction.entity.Transaction;
+import com.nexora.banking.transaction.enums.TransactionCategory;
+import com.nexora.banking.transaction.enums.TransactionType;
+import com.nexora.banking.transaction.service.TransactionService;
 import com.nexora.banking.user.entity.User;
 import com.nexora.banking.wallet.dto.response.WalletResponse;
 import com.nexora.banking.wallet.entity.Wallet;
@@ -31,12 +36,14 @@ class WalletServiceTest {
     @Mock
     private WalletRepository walletRepository;
 
+    @Mock
+    private TransactionService transactionService;
+
     @InjectMocks
     private WalletServiceImpl walletService;
 
     private User user;
     private Wallet wallet;
-
     private UUID userId;
 
     @BeforeEach
@@ -50,7 +57,6 @@ class WalletServiceTest {
                 "ifeanyi@example.com"
         );
 
-        // Assuming BaseEntity has a setId method.
         user.setId(userId);
 
         wallet = Wallet.builder()
@@ -64,15 +70,12 @@ class WalletServiceTest {
     @Test
     void getMyWallet_shouldReturnWallet() {
 
-        // Arrange
         when(walletRepository.findByUserId(userId))
                 .thenReturn(Optional.of(wallet));
 
-        // Act
         WalletResponse response =
                 walletService.getMyWallet(userId);
 
-        // Assert
         assertThat(response)
                 .isNotNull();
 
@@ -95,15 +98,13 @@ class WalletServiceTest {
     @Test
     void getMyWallet_shouldThrowWhenWalletDoesNotExist() {
 
-        // Arrange
         when(walletRepository.findByUserId(userId))
                 .thenReturn(Optional.empty());
 
-        // Act + Assert
         assertThatThrownBy(
                 () -> walletService.getMyWallet(userId)
         )
-                .isInstanceOf(ResourceNotFoundException.class)
+                .isInstanceOf(WalletNotFoundException.class)
                 .hasMessage("Wallet not found.");
 
         verify(walletRepository)
@@ -111,63 +112,127 @@ class WalletServiceTest {
     }
 
     @Test
-    void deposit_shouldIncreaseWalletBalance() {
+    void deposit_shouldIncreaseWalletBalanceAndCreateLedgerTransaction() {
 
-        // Arrange
         when(walletRepository.findByUserIdForUpdate(userId))
                 .thenReturn(Optional.of(wallet));
 
-        // Act
         WalletResponse response =
                 walletService.deposit(
                         userId,
                         new BigDecimal("500.00")
                 );
 
-        // Assert
+        // Wallet state
         assertThat(wallet.getBalance())
                 .isEqualByComparingTo("1500.00");
 
         assertThat(response.balance())
                 .isEqualByComparingTo("1500.00");
 
+        // Repository interaction
         verify(walletRepository)
                 .findByUserIdForUpdate(userId);
+
+        // Ledger transaction
+        ArgumentCaptor<Transaction> transactionCaptor =
+                ArgumentCaptor.forClass(Transaction.class);
+
+        verify(transactionService)
+                .save(transactionCaptor.capture());
+
+        Transaction transaction =
+                transactionCaptor.getValue();
+
+        assertThat(transaction.getType())
+                .isEqualTo(TransactionType.CREDIT);
+
+        assertThat(transaction.getCategory())
+                .isEqualTo(TransactionCategory.DEPOSIT);
+
+        assertThat(transaction.getAmount())
+                .isEqualByComparingTo("500.00");
+
+        assertThat(transaction.getBalanceBefore())
+                .isEqualByComparingTo("1000.00");
+
+        assertThat(transaction.getBalanceAfter())
+                .isEqualByComparingTo("1500.00");
+
+        assertThat(transaction.getDescription())
+                .isEqualTo("Wallet deposit");
+
+        assertThat(transaction.getTransfer())
+                .isNull();
+
+        assertThat(transaction.getWallet())
+                .isEqualTo(wallet);
     }
 
     @Test
-    void withdraw_shouldDecreaseWalletBalance() {
+    void withdraw_shouldDecreaseWalletBalanceAndCreateLedgerTransaction() {
 
-        // Arrange
         when(walletRepository.findByUserIdForUpdate(userId))
                 .thenReturn(Optional.of(wallet));
 
-        // Act
         WalletResponse response =
                 walletService.withdraw(
                         userId,
                         new BigDecimal("300.00")
                 );
 
-        // Assert
+        // Wallet state
         assertThat(wallet.getBalance())
                 .isEqualByComparingTo("700.00");
 
         assertThat(response.balance())
                 .isEqualByComparingTo("700.00");
 
+        // Repository interaction
         verify(walletRepository)
                 .findByUserIdForUpdate(userId);
+
+        // Ledger transaction
+        ArgumentCaptor<Transaction> transactionCaptor =
+                ArgumentCaptor.forClass(Transaction.class);
+
+        verify(transactionService)
+                .save(transactionCaptor.capture());
+
+        Transaction transaction =
+                transactionCaptor.getValue();
+
+        assertThat(transaction.getType())
+                .isEqualTo(TransactionType.DEBIT);
+
+        assertThat(transaction.getCategory())
+                .isEqualTo(TransactionCategory.WITHDRAWAL);
+
+        assertThat(transaction.getAmount())
+                .isEqualByComparingTo("300.00");
+
+        assertThat(transaction.getBalanceBefore())
+                .isEqualByComparingTo("1000.00");
+
+        assertThat(transaction.getBalanceAfter())
+                .isEqualByComparingTo("700.00");
+
+        assertThat(transaction.getDescription())
+                .isEqualTo("Wallet withdrawal");
+
+        assertThat(transaction.getTransfer())
+                .isNull();
+
+        assertThat(transaction.getWallet())
+                .isEqualTo(wallet);
     }
 
     @Test
-    void withdraw_shouldRejectInsufficientBalance() {
+    void withdraw_shouldRejectInsufficientBalanceAndNotCreateLedgerTransaction() {
 
-        // Arrange
         when(walletRepository.findByUserIdForUpdate(userId))
                 .thenReturn(Optional.of(wallet));
 
-        // Act + Assert
         assertThatThrownBy(
                 () -> walletService.withdraw(
                         userId,
@@ -177,47 +242,51 @@ class WalletServiceTest {
                 .isInstanceOf(InsufficientBalanceException.class)
                 .hasMessage("Insufficient balance.");
 
-        // Balance must remain unchanged
         assertThat(wallet.getBalance())
                 .isEqualByComparingTo("1000.00");
 
         verify(walletRepository)
                 .findByUserIdForUpdate(userId);
+
+        verify(transactionService, never())
+                .save(any(Transaction.class));
     }
 
     @Test
     void deposit_shouldThrowWhenWalletDoesNotExist() {
 
-        // Arrange
         when(walletRepository.findByUserIdForUpdate(userId))
                 .thenReturn(Optional.empty());
 
-        // Act + Assert
         assertThatThrownBy(
                 () -> walletService.deposit(
                         userId,
                         new BigDecimal("500.00")
                 )
         )
-                .isInstanceOf(ResourceNotFoundException.class)
+                .isInstanceOf(WalletNotFoundException.class)
                 .hasMessage("Wallet not found.");
+
+        verify(transactionService, never())
+                .save(any(Transaction.class));
     }
 
     @Test
     void withdraw_shouldThrowWhenWalletDoesNotExist() {
 
-        // Arrange
         when(walletRepository.findByUserIdForUpdate(userId))
                 .thenReturn(Optional.empty());
 
-        // Act + Assert
         assertThatThrownBy(
                 () -> walletService.withdraw(
                         userId,
                         new BigDecimal("500.00")
                 )
         )
-                .isInstanceOf(ResourceNotFoundException.class)
+                .isInstanceOf(WalletNotFoundException.class)
                 .hasMessage("Wallet not found.");
+
+        verify(transactionService, never())
+                .save(any(Transaction.class));
     }
 }

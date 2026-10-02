@@ -3,7 +3,7 @@ package com.nexora.banking.transfer.service;
 import com.nexora.banking.transfer.exception.IdempotencyKeyConflictException;
 import com.nexora.banking.transfer.exception.SelfTransferException;
 import com.nexora.banking.transfer.exception.WalletNotActiveException;
-import com.nexora.banking.common.exception.WalletNotFoundException;
+import com.nexora.banking.wallet.exceptions.WalletNotFoundException;
 
 import com.nexora.banking.transfer.dto.request.TransferRequest;
 import com.nexora.banking.transfer.dto.response.TransferResponse;
@@ -21,6 +21,7 @@ import com.nexora.banking.wallet.repository.WalletRepository;
 
 import com.nexora.banking.transaction.entity.Transaction;
 import com.nexora.banking.transaction.enums.TransactionType;
+import com.nexora.banking.transaction.enums.TransactionCategory;
 import com.nexora.banking.transaction.factory.TransactionFactory;
 import com.nexora.banking.transaction.service.TransactionService;
 
@@ -295,6 +296,8 @@ public class TransferServiceImpl implements TransferService {
                         senderWallet,
                         savedTransfer,
                         TransactionType.DEBIT,
+                        TransactionCategory.TRANSFER,
+                        request.amount(),
                         senderBalanceBefore,
                         senderBalanceAfter,
                         "Transfer to "
@@ -313,6 +316,8 @@ public class TransferServiceImpl implements TransferService {
                         receiverWallet,
                         savedTransfer,
                         TransactionType.CREDIT,
+                        TransactionCategory.TRANSFER,
+                        request.amount(),
                         receiverBalanceBefore,
                         receiverBalanceAfter,
                         "Transfer from "
@@ -346,7 +351,6 @@ public class TransferServiceImpl implements TransferService {
     }
 
     private String generateReference() {
-
         return "TRX-" + UUID.randomUUID();
     }
 }
