@@ -1,6 +1,7 @@
 package com.nexora.banking.funding.entity;
 
 import com.nexora.banking.common.entity.BaseEntity;
+import com.nexora.banking.funding.enums.FundingMethod;
 import com.nexora.banking.funding.enums.FundingProvider;
 import com.nexora.banking.funding.enums.FundingStatus;
 import com.nexora.banking.user.entity.User;
@@ -90,6 +91,13 @@ public class Funding extends BaseEntity {
             length = 30
     )
     private FundingStatus status;
+
+    @Enumerated(EnumType.STRING)
+	@Column(
+			nullable = false,
+		length = 30
+	)
+	private FundingMethod method;
 
     @Enumerated(EnumType.STRING)
     @Column(
