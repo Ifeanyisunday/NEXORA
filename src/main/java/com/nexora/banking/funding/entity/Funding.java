@@ -116,4 +116,32 @@ public class Funding extends BaseEntity {
             name = "completed_at"
     )
     private Instant completedAt;
+
+
+
+    public void markProcessing(String providerReference) {
+    if (status != FundingStatus.PENDING) {
+        throw new IllegalStateException(
+                "Only pending funding can enter processing."
+        );
+    }
+
+    if (providerReference == null || providerReference.isBlank()) {
+        throw new IllegalArgumentException(
+                "Provider reference is required."
+        );
+    }
+		this.providerReference = providerReference;
+		this.status = FundingStatus.PROCESSING;
+	}
+
+	public void markFailed() {
+		if (status != FundingStatus.PENDING
+				&& status != FundingStatus.PROCESSING) {
+			throw new IllegalStateException(
+					"Only pending or processing funding can fail."
+			);
+		}
+		this.status = FundingStatus.FAILED;
+	}
 }
