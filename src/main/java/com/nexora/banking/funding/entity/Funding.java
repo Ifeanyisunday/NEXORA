@@ -144,4 +144,21 @@ public class Funding extends BaseEntity {
 		}
 		this.status = FundingStatus.FAILED;
 	}
+
+	public void markCompleted(Instant completedAt) {
+		if (status != FundingStatus.PROCESSING) {
+			throw new IllegalStateException(
+					"Only processing funding can be completed."
+			);
+		}
+
+		if (completedAt == null) {
+			throw new IllegalArgumentException(
+					"Completion time is required."
+			);
+		}
+
+		this.status = FundingStatus.COMPLETED;
+		this.completedAt = completedAt;
+	}
 }
