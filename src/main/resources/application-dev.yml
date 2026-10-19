@@ -1,25 +1,19 @@
+
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/nexoradb
-    username: postgres
-    password: vitalspring10
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/nexoradb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
       ddl-auto: validate
 
-    open-in-view: false
-
-    properties:
-      hibernate:
-        format_sql: true
-
   flyway:
     enabled: true
 
 jwt:
-  secret: "MWRkZDU5YmQ0YTU4Y2Y4YzQ0OTQxMWY2YjA5ZjQxOWIxODg4NmRmNDU0M2VkODZiM2Y5NzQzOTVhMjQ0ZjE4YQ=="
-  expiration: 15m
+  secret: ${JWT_SECRET}
 
 logging:
   level:

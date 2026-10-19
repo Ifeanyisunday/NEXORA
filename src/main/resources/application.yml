@@ -5,5 +5,15 @@ spring:
   profiles:
     active: dev
 
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
 server:
   port: 8080
+
+
+jwt:
+  expiration: 15m

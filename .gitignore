@@ -32,3 +32,17 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Local configuration overrides
+application-local.yml
+application-local.yaml
+
+# Build output
+target/

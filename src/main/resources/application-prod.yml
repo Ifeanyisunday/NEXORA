@@ -1,5 +1,20 @@
+
 spring:
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    org.hibernate.SQL: INFO
+
+jwt:
+  secret: ${JWT_SECRET}
