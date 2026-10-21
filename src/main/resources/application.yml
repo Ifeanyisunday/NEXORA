@@ -1,19 +1,23 @@
 spring:
-  application:
-    name: banking-api
-
   profiles:
-    active: dev
+    default: none
 
   jpa:
+    hibernate:
+      ddl-auto: validate
+
     open-in-view: false
+
     properties:
       hibernate:
         format_sql: true
 
-server:
-  port: 8080
-
+  flyway:
+    enabled: true
 
 jwt:
   expiration: 15m
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG

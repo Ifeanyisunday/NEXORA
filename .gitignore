@@ -46,3 +46,11 @@ application-local.yaml
 
 # Build output
 target/
+
+IDE and operating-system files
+
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

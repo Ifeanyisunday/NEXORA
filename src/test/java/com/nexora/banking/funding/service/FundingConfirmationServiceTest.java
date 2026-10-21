@@ -87,12 +87,12 @@ class FundingConfirmationServiceTest {
                 .thenReturn(Optional.of(wallet));
 
         FundingResponse response =
-        fundingConfirmationService.confirmFunding(
-                funding.getReference(),
-                FundingProvider.MOCK,
-                funding.getProviderReference(),
-                true
-        );
+                fundingConfirmationService.confirmFunding(
+                        fundingReference,
+                        FundingProvider.MOCK,
+                        funding.getProviderReference(),
+                        true
+                );
 
         assertThat(wallet.getBalance())
                 .isEqualByComparingTo("1500.00");
@@ -135,11 +135,11 @@ class FundingConfirmationServiceTest {
 
         FundingResponse response =
                 fundingConfirmationService.confirmFunding(
-                funding.getReference(),
-                FundingProvider.MOCK,
-                funding.getProviderReference(),
-                true
-        );
+                        fundingReference,
+                        FundingProvider.MOCK,
+                        funding.getProviderReference(),
+                        true
+                );
 
         assertThat(response.status())
                 .isEqualTo(FundingStatus.COMPLETED);
@@ -160,14 +160,16 @@ class FundingConfirmationServiceTest {
 
         assertThatThrownBy(
                 () -> fundingConfirmationService.confirmFunding(
-                funding.getReference(),
-                FundingProvider.MOCK,
-                funding.getProviderReference(),
-                true
-        	)
+                        fundingReference,
+                        FundingProvider.MOCK,
+                        funding.getProviderReference(),
+                        true
+                )
         )
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Only processing funding can be confirmed.");
+                .hasMessage(
+                        "Only processing funding can be confirmed."
+                );
 
         assertThat(wallet.getBalance())
                 .isEqualByComparingTo("1000.00");
@@ -177,25 +179,76 @@ class FundingConfirmationServiceTest {
     }
 
     @Test
-	void confirmFunding_shouldRejectMismatchedProviderReference() {
-		when(fundingRepository.findByReferenceForUpdate(fundingReference))
-				.thenReturn(Optional.of(funding));
+    void confirmFunding_shouldRejectMismatchedProviderReference() {
+        when(fundingRepository.findByReferenceForUpdate(fundingReference))
+                .thenReturn(Optional.of(funding));
 
-		assertThatThrownBy(
-				() -> fundingConfirmationService.confirmFunding(
-						fundingReference,
-						FundingProvider.MOCK,
-						"MOCK-INVALID-REFERENCE",
-						true
-				)
-		)
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("Provider reference does not match.");
+        assertThatThrownBy(
+                () -> fundingConfirmationService.confirmFunding(
+                        fundingReference,
+                        FundingProvider.MOCK,
+                        "MOCK-INVALID-REFERENCE",
+                        true
+                )
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Provider reference does not match.");
 
-		assertThat(wallet.getBalance())
-				.isEqualByComparingTo("1000.00");
+        assertThat(wallet.getBalance())
+                .isEqualByComparingTo("1000.00");
 
-		verifyNoInteractions(walletRepository);
-		verifyNoInteractions(transactionService);
-	}
-}
+        verifyNoInteractions(walletRepository);
+        verifyNoInteractions(transactionService);
+    }
+
+    @Test
+    void confirmFunding_shouldRejectMissingProvider() {
+        when(fundingRepository.findByReferenceForUpdate(fundingReference))
+                .thenReturn(Optional.of(funding));
+
+        assertThatThrownBy(
+                () -> fundingConfirmationService.confirmFunding(
+                        fundingReference,
+                        null,
+                        funding.getProviderReference(),
+                        true
+                )
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(
+                        "Funding does not belong to this provider."
+                );
+
+        assertThat(wallet.getBalance())
+                .isEqualByComparingTo("1000.00");
+
+        verifyNoInteractions(walletRepository);
+        verifyNoInteractions(transactionService);
+    }
+
+    @Test
+    void confirmFunding_shouldMarkFailedPaymentWithoutCreditingWallet() {
+        when(fundingRepository.findByReferenceForUpdate(fundingReference))
+                .thenReturn(Optional.of(funding));
+
+        FundingResponse response =
+                fundingConfirmationService.confirmFunding(
+                        fundingReference,
+                        FundingProvider.MOCK,
+                        funding.getProviderReference(),
+                        false
+                );
+
+        assertThat(response.status())
+                .isEqualTo(FundingStatus.FAILED);
+
+        assertThat(wallet.getBalance())
+                .isEqualByComparingTo("1000.00");
+
+        verify(fundingRepository)
+                .findByReferenceForUpdate(fundingReference);
+
+        verifyNoInteractions(walletRepository);
+        verifyNoInteractions(transactionService);
+    }
+};
