@@ -6,8 +6,6 @@ import com.nexora.banking.funding.enums.FundingProvider;
 import com.nexora.banking.funding.enums.FundingStatus;
 import com.nexora.banking.funding.repository.FundingRepository;
 import com.nexora.banking.transaction.entity.Transaction;
-import com.nexora.banking.transaction.enums.TransactionCategory;
-import com.nexora.banking.transaction.enums.TransactionType;
 import com.nexora.banking.transaction.factory.TransactionFactory;
 import com.nexora.banking.transaction.service.TransactionService;
 import com.nexora.banking.wallet.entity.Wallet;
@@ -47,8 +45,8 @@ public class FundingConfirmationServiceImpl
                         )
                 );
 
-        // 2. Validate the provider and its reference before
-        // accepting even an idempotent retry.
+        // 2. Validate the provider and its reference before accepting
+        // an idempotent retry.
         if (funding.getProvider() != provider) {
             throw new IllegalArgumentException(
                     "Funding does not belong to this provider."
@@ -72,16 +70,16 @@ public class FundingConfirmationServiceImpl
                         "Completed funding cannot be marked failed."
                 );
             }
-
+            
             return FundingResponse.from(funding);
         }
 
         // 4. Only processing funding can receive a final outcome.
         if (funding.getStatus() != FundingStatus.PROCESSING) {
-			throw new IllegalStateException(
-					"Only processing funding can be confirmed."
-			);
-		}
+            throw new IllegalStateException(
+                    "Only processing funding can be confirmed."
+            );
+        }
 
         // 5. A provider failure must never credit the wallet.
         if (!successful) {
@@ -111,17 +109,17 @@ public class FundingConfirmationServiceImpl
 
         BigDecimal balanceAfter = wallet.getBalance();
 
-        Transaction transaction = TransactionFactory.create(
+        // 8. Link the ledger transaction to the funding record.
+        Transaction transaction = TransactionFactory.createForFunding(
                 wallet,
-                TransactionType.CREDIT,
-                TransactionCategory.DEPOSIT,
+                funding,
                 funding.getAmount(),
                 balanceBefore,
                 balanceAfter,
                 "Wallet funding: " + funding.getReference()
         );
 
-        // 8. Save the ledger transaction and complete the funding
+        // 9. Save the ledger transaction and complete the funding
         // inside the same database transaction.
         transactionService.save(transaction);
 

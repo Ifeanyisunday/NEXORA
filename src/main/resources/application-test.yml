@@ -12,4 +12,5 @@ spring:
     enabled: true
 
 jwt:
-  secret: ${TEST_JWT_SECRET}
+  secret: ${JWT_SECRET}
+  expiration: 15m

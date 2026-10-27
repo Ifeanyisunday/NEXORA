@@ -1,6 +1,7 @@
 package com.nexora.banking.transaction.entity;
 
 import com.nexora.banking.common.entity.BaseEntity;
+import com.nexora.banking.funding.entity.Funding;
 import com.nexora.banking.transaction.enums.TransactionCategory;
 import com.nexora.banking.transaction.enums.TransactionStatus;
 import com.nexora.banking.transaction.enums.TransactionType;
@@ -18,6 +19,10 @@ import java.math.BigDecimal;
                 @UniqueConstraint(
                         name = "uk_transaction_reference",
                         columnNames = "reference"
+                ),
+                @UniqueConstraint(
+                        name = "uk_transaction_funding_id",
+                        columnNames = "funding_id"
                 )
         },
         indexes = {
@@ -96,4 +101,12 @@ public class Transaction extends BaseEntity {
     @JoinColumn(name = "transfer_id")
     private Transfer transfer;
 
+    /*
+     * Most transactions are not wallet-funding entries, so this field
+     * remains nullable. The database unique constraint allows multiple
+     * NULL values but only one row per non-null funding ID.
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "funding_id")
+    private Funding funding;
 }

@@ -1,4 +1,3 @@
-
 package com.nexora.banking.funding.service;
 
 import com.nexora.banking.funding.dto.response.FundingResponse;
@@ -29,6 +28,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,12 +42,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -129,6 +127,9 @@ class FundingConfirmationIntegrationTest {
 
         assertThat(transaction.getWallet().getId())
                 .isEqualTo(wallet.getId());
+
+        assertThat(transaction.getFunding().getId())
+                .isEqualTo(funding.getId());
     }
 
     @Test
@@ -345,12 +346,48 @@ class FundingConfirmationIntegrationTest {
         return fundingRepository.saveAndFlush(funding);
     }
 
+    @Test
+    void database_shouldRejectMoreThanOneLedgerEntryForSameFunding() {
+        Funding funding = createProcessingFunding();
+        Wallet wallet = funding.getWallet();
+
+        Transaction firstLedgerEntry = Transaction.builder()
+                .wallet(wallet)
+                .funding(funding)
+                .type(TransactionType.CREDIT)
+                .category(TransactionCategory.DEPOSIT)
+                .amount(funding.getAmount())
+                .balanceBefore(new BigDecimal("1000.00"))
+                .balanceAfter(new BigDecimal("1500.00"))
+                .reference("TXN-FUNDING-ONE-" + UUID.randomUUID())
+                .description("First ledger entry for funding")
+                .status(TransactionStatus.COMPLETED)
+                .build();
+
+        transactionRepository.saveAndFlush(firstLedgerEntry);
+
+        Transaction duplicateLedgerEntry = Transaction.builder()
+                .wallet(wallet)
+                .funding(funding)
+                .type(TransactionType.CREDIT)
+                .category(TransactionCategory.DEPOSIT)
+                .amount(funding.getAmount())
+                .balanceBefore(new BigDecimal("1500.00"))
+                .balanceAfter(new BigDecimal("2000.00"))
+                .reference("TXN-FUNDING-TWO-" + UUID.randomUUID())
+                .description("Deliberate duplicate ledger entry for same funding")
+                .status(TransactionStatus.COMPLETED)
+                .build();
+
+        assertThatThrownBy(
+                () -> transactionRepository.saveAndFlush(duplicateLedgerEntry)
+        ).isInstanceOf(DataIntegrityViolationException.class);
+    }
 
     @Test
     void concurrentSuccessfulCallbacks_shouldCreditWalletOnlyOnce()
             throws Exception {
 
-        // Arrange: create one processing funding record and its wallet.
         Funding funding = createProcessingFunding();
         Wallet wallet = funding.getWallet();
 
@@ -360,9 +397,9 @@ class FundingConfirmationIntegrationTest {
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
         try {
-            // Both workers wait until they are ready before starting.
             Future<FundingResponse> firstCallback = executor.submit(() -> {
                 ready.countDown();
+
                 if (!start.await(10, TimeUnit.SECONDS)) {
                     throw new IllegalStateException(
                             "Timed out waiting to start first callback."
@@ -379,6 +416,7 @@ class FundingConfirmationIntegrationTest {
 
             Future<FundingResponse> secondCallback = executor.submit(() -> {
                 ready.countDown();
+
                 if (!start.await(10, TimeUnit.SECONDS)) {
                     throw new IllegalStateException(
                             "Timed out waiting to start second callback."
@@ -393,28 +431,24 @@ class FundingConfirmationIntegrationTest {
                 );
             });
 
-            // Ensure both worker threads are ready before releasing them.
             assertThat(ready.await(10, TimeUnit.SECONDS))
                     .as("Both callback workers should be ready")
                     .isTrue();
 
-            // Release both callbacks as close together as possible.
             start.countDown();
 
-            // get() propagates worker failures and imposes a timeout.
             firstCallback.get(20, TimeUnit.SECONDS);
             secondCallback.get(20, TimeUnit.SECONDS);
 
         } finally {
-            // Always release blocked workers and shut down the executor.
             start.countDown();
             executor.shutdownNow();
+
             assertThat(executor.awaitTermination(10, TimeUnit.SECONDS))
                     .as("Callback workers should terminate")
                     .isTrue();
         }
 
-        // Assert: reload committed state from the database.
         Wallet persistedWallet = walletRepository
                 .findById(wallet.getId())
                 .orElseThrow();

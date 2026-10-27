@@ -1,5 +1,6 @@
 package com.nexora.banking.transaction.factory;
 
+import com.nexora.banking.funding.entity.Funding;
 import com.nexora.banking.transaction.entity.Transaction;
 import com.nexora.banking.transaction.enums.TransactionCategory;
 import com.nexora.banking.transaction.enums.TransactionStatus;
@@ -51,6 +52,28 @@ public final class TransactionFactory {
                 .transfer(transfer)
                 .type(type)
                 .category(category)
+                .amount(amount)
+                .balanceBefore(balanceBefore)
+                .balanceAfter(balanceAfter)
+                .reference(generateTransactionReference())
+                .description(description)
+                .status(TransactionStatus.COMPLETED)
+                .build();
+    }
+
+    public static Transaction createForFunding(
+            Wallet wallet,
+            Funding funding,
+            BigDecimal amount,
+            BigDecimal balanceBefore,
+            BigDecimal balanceAfter,
+            String description
+    ) {
+        return Transaction.builder()
+                .wallet(wallet)
+                .funding(funding)
+                .type(TransactionType.CREDIT)
+                .category(TransactionCategory.DEPOSIT)
                 .amount(amount)
                 .balanceBefore(balanceBefore)
                 .balanceAfter(balanceAfter)
