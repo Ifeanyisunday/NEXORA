@@ -1,15 +1,9 @@
 spring:
   datasource:
-    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/nexora_test}
+    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/nexoradb}
     username: ${TEST_DB_USERNAME:postgres}
     password: ${TEST_DB_PASSWORD}
 
-  jpa:
-    hibernate:
-      ddl-auto: validate
-
-  flyway:
-    enabled: true
 
 jwt:
   secret: ${JWT_SECRET}
