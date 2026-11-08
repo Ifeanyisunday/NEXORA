@@ -3,15 +3,15 @@ package com.nexora.banking.funding.service;
 import com.nexora.banking.funding.dto.request.CreateFundingRequest;
 import com.nexora.banking.funding.dto.response.FundingResponse;
 import com.nexora.banking.funding.entity.Funding;
-import com.nexora.banking.funding.factory.FundingFactory;
+import com.nexora.banking.funding.exception.FundingIdempotencyKeyConflictException;
 import com.nexora.banking.funding.provider.FundingProviderClient;
 import com.nexora.banking.funding.provider.FundingProviderResult;
-import com.nexora.banking.funding.enums.FundingProvider;
 import com.nexora.banking.funding.repository.FundingRepository;
 import com.nexora.banking.user.entity.User;
-import com.nexora.banking.wallet.enums.WalletStatus;
-import com.nexora.banking.wallet.repository.WalletRepository;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,37 +19,65 @@ import org.springframework.stereotype.Service;
 public class FundingServiceImpl implements FundingService {
 
     private final FundingRepository fundingRepository;
-    private final WalletRepository walletRepository;
+    private final FundingReservationService fundingReservationService;
     private final FundingProviderClient fundingProviderClient;
 
     @Override
     public FundingResponse initiateFunding(
             User currentUser,
-            CreateFundingRequest request
+            CreateFundingRequest request,
+            String idempotencyKey
     ) {
-        var wallet = walletRepository.findByUser(currentUser)
-                .orElseThrow(() ->
-                        new IllegalStateException(
-                                "Wallet not found."
-                        )
-                );
 
-        if (wallet.getStatus() != WalletStatus.ACTIVE) {
-            throw new IllegalStateException(
-                    "Wallet is not active."
+        FundingReservationService.Reservation reservation;
+
+        try {
+            reservation = fundingReservationService.reserve(
+                    currentUser,
+                    request,
+                    idempotencyKey
             );
+
+        } catch (DataIntegrityViolationException exception) {
+
+            /*
+             * Another concurrent request may have created
+             * the same user's funding reservation first.
+             *
+             * The reservation transaction has rolled back
+             * before execution reaches this catch block.
+             */
+
+            Funding existingFunding = fundingRepository
+                    .findByUserAndIdempotencyKey(
+                            currentUser,
+                            idempotencyKey
+                    )
+                    .orElseThrow(() -> exception);
+
+            fundingReservationService.validateSameRequest(
+                    existingFunding,
+                    request
+            );
+
+            return FundingResponse.from(existingFunding);
         }
 
-        Funding funding = FundingFactory.create(
-                currentUser,
-                wallet,
-                request.amount(),
-                request.method(),
-                FundingProvider.MOCK
-        );
+        Funding funding = reservation.funding();
 
-        funding = fundingRepository.save(funding);
+        /*
+         * Existing idempotency key:
+         * Return the existing funding record.
+         * Do not call the payment provider again.
+         */
+        if (!reservation.newlyCreated()) {
+            return FundingResponse.from(funding);
+        }
 
+        /*
+         * Only newly created funding reservations
+         * are sent to the payment provider.
+         */
         FundingProviderResult result =
                 fundingProviderClient.initiate(funding);
 

@@ -23,6 +23,9 @@ import com.nexora.banking.transaction.exception.InvalidTransactionFilterExceptio
 import com.nexora.banking.transaction.exception.InvalidPaginationException;
 import com.nexora.banking.statement.exception.InvalidStatementDateException;
 import com.nexora.banking.statement.exception.StatementIntegrityException;
+import com.nexora.banking.funding.exception.FundingIdempotencyKeyConflictException;
+
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -307,6 +310,29 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI()
         );
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
+
+
+        @ExceptionHandler(FundingIdempotencyKeyConflictException.class)
+        public ResponseEntity<ApiErrorResponse> handleFundingIdempotencyConflict(
+                FundingIdempotencyKeyConflictException ex,
+                HttpServletRequest request
+        ) {
+
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "IDEMPOTENCY_KEY_CONFLICT",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
         return ResponseEntity
                 .status(status)
                 .body(response);

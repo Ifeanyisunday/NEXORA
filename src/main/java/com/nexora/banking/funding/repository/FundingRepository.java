@@ -2,7 +2,10 @@ package com.nexora.banking.funding.repository;
 
 import com.nexora.banking.funding.entity.Funding;
 import com.nexora.banking.funding.enums.FundingProvider;
+import com.nexora.banking.user.entity.User;
+
 import jakarta.persistence.LockModeType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +17,11 @@ import java.util.UUID;
 public interface FundingRepository extends JpaRepository<Funding, UUID> {
 
     Optional<Funding> findByReference(String reference);
+
+    Optional<Funding> findByUserAndIdempotencyKey(
+            User user,
+            String idempotencyKey
+    );
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""

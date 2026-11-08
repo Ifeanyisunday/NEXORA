@@ -28,6 +28,13 @@ import java.time.Instant;
                                 "provider",
                                 "provider_reference"
                         }
+                ),
+                @UniqueConstraint(
+                        name = "uk_funding_user_idempotency",
+                        columnNames = {
+                                "user_id",
+                                "idempotency_key"
+                        }
                 )
         },
         indexes = {
@@ -85,6 +92,13 @@ public class Funding extends BaseEntity {
     )
     private String reference;
 
+    @Column(
+            name = "idempotency_key",
+            nullable = false,
+            length = 100
+    )
+    private String idempotencyKey;
+
     @Enumerated(EnumType.STRING)
     @Column(
             nullable = false,
@@ -93,11 +107,11 @@ public class Funding extends BaseEntity {
     private FundingStatus status;
 
     @Enumerated(EnumType.STRING)
-	@Column(
-			nullable = false,
-		length = 30
-	)
-	private FundingMethod method;
+    @Column(
+            nullable = false,
+            length = 30
+    )
+    private FundingMethod method;
 
     @Enumerated(EnumType.STRING)
     @Column(
@@ -112,53 +126,51 @@ public class Funding extends BaseEntity {
     )
     private String providerReference;
 
-    @Column(
-            name = "completed_at"
-    )
+    @Column(name = "completed_at")
     private Instant completedAt;
 
-
-
     public void markProcessing(String providerReference) {
-    if (status != FundingStatus.PENDING) {
-        throw new IllegalStateException(
-                "Only pending funding can enter processing."
-        );
+        if (status != FundingStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Only pending funding can enter processing."
+            );
+        }
+
+        if (providerReference == null || providerReference.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Provider reference is required."
+            );
+        }
+
+        this.providerReference = providerReference;
+        this.status = FundingStatus.PROCESSING;
     }
 
-    if (providerReference == null || providerReference.isBlank()) {
-        throw new IllegalArgumentException(
-                "Provider reference is required."
-        );
+    public void markFailed() {
+        if (status != FundingStatus.PENDING
+                && status != FundingStatus.PROCESSING) {
+            throw new IllegalStateException(
+                    "Only pending or processing funding can fail."
+            );
+        }
+
+        this.status = FundingStatus.FAILED;
     }
-		this.providerReference = providerReference;
-		this.status = FundingStatus.PROCESSING;
-	}
 
-	public void markFailed() {
-		if (status != FundingStatus.PENDING
-				&& status != FundingStatus.PROCESSING) {
-			throw new IllegalStateException(
-					"Only pending or processing funding can fail."
-			);
-		}
-		this.status = FundingStatus.FAILED;
-	}
+    public void markCompleted(Instant completedAt) {
+        if (status != FundingStatus.PROCESSING) {
+            throw new IllegalStateException(
+                    "Only processing funding can be completed."
+            );
+        }
 
-	public void markCompleted(Instant completedAt) {
-		if (status != FundingStatus.PROCESSING) {
-			throw new IllegalStateException(
-					"Only processing funding can be completed."
-			);
-		}
+        if (completedAt == null) {
+            throw new IllegalArgumentException(
+                    "Completion time is required."
+            );
+        }
 
-		if (completedAt == null) {
-			throw new IllegalArgumentException(
-					"Completion time is required."
-			);
-		}
-
-		this.status = FundingStatus.COMPLETED;
-		this.completedAt = completedAt;
-	}
+        this.status = FundingStatus.COMPLETED;
+        this.completedAt = completedAt;
+    }
 }

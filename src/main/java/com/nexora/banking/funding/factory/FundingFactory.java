@@ -20,7 +20,8 @@ public final class FundingFactory {
             Wallet wallet,
             BigDecimal amount,
             FundingMethod method,
-            FundingProvider provider
+            FundingProvider provider,
+            String idempotencyKey
     ) {
         return Funding.builder()
                 .user(user)
@@ -29,6 +30,7 @@ public final class FundingFactory {
                 .currency(wallet.getCurrency())
                 .method(method)
                 .provider(provider)
+                .idempotencyKey(idempotencyKey)
                 .status(FundingStatus.PENDING)
                 .reference(generateFundingReference())
                 .build();

@@ -8,6 +8,7 @@ public interface FundingService {
 
     FundingResponse initiateFunding(
             User currentUser,
-            CreateFundingRequest request
+            CreateFundingRequest request,
+            String idempotencyKey
     );
 }
