@@ -308,43 +308,44 @@ class FundingConfirmationIntegrationTest {
     }
 
     private Funding createProcessingFunding() {
-        String uniqueId = UUID.randomUUID().toString();
+		String uniqueId = UUID.randomUUID().toString();
 
-        User user = new User();
-        user.setEmail("funding-test-" + uniqueId + "@example.com");
-        user.setPasswordHash("integration-test-hash");
+		User user = new User();
+		user.setEmail("funding-test-" + uniqueId + "@example.com");
+		user.setPasswordHash("integration-test-hash");
 
-        User persistedUser = userRepository.saveAndFlush(user);
+		User persistedUser = userRepository.saveAndFlush(user);
 
-        Wallet wallet = Wallet.builder()
-                .user(persistedUser)
-                .balance(new BigDecimal("1000.00"))
-                .accountNumber(
-                        "9" + UUID.randomUUID()
-                                .toString()
-                                .replace("-", "")
-                                .substring(0, 9)
-                )
-                .currency(Currency.NGN)
-                .status(WalletStatus.ACTIVE)
-                .build();
+		Wallet wallet = Wallet.builder()
+				.user(persistedUser)
+				.balance(new BigDecimal("1000.00"))
+				.accountNumber(
+						"9" + UUID.randomUUID()
+								.toString()
+								.replace("-", "")
+								.substring(0, 9)
+				)
+				.currency(Currency.NGN)
+				.status(WalletStatus.ACTIVE)
+				.build();
 
-        Wallet persistedWallet = walletRepository.saveAndFlush(wallet);
+		Wallet persistedWallet = walletRepository.saveAndFlush(wallet);
 
-        Funding funding = Funding.builder()
-                .user(persistedUser)
-                .wallet(persistedWallet)
-                .amount(new BigDecimal("500.00"))
-                .currency(Currency.NGN)
-                .reference("FND-" + uniqueId)
-                .status(FundingStatus.PROCESSING)
-                .provider(FundingProvider.MOCK)
-                .providerReference("MOCK-" + uniqueId)
-                .method(FundingMethod.CARD)
-                .build();
+		Funding funding = Funding.builder()
+				.user(persistedUser)
+				.wallet(persistedWallet)
+				.amount(new BigDecimal("500.00"))
+				.currency(Currency.NGN)
+				.reference("FND-" + uniqueId)
+				.idempotencyKey("TEST-" + uniqueId)
+				.status(FundingStatus.PROCESSING)
+				.provider(FundingProvider.MOCK)
+				.providerReference("MOCK-" + uniqueId)
+				.method(FundingMethod.CARD)
+				.build();
 
-        return fundingRepository.saveAndFlush(funding);
-    }
+		return fundingRepository.saveAndFlush(funding);
+	}
 
     @Test
     void database_shouldRejectMoreThanOneLedgerEntryForSameFunding() {
