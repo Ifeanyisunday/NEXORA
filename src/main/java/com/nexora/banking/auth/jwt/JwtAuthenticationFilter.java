@@ -17,8 +17,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import io.jsonwebtoken.JwtException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 
 @Component
 @RequiredArgsConstructor
@@ -28,8 +28,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final CustomUserDetailsService userDetailsService;
 
-    private static final Logger log =
-        LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    // private static final Logger log =
+    //     LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     @Override
     protected void doFilterInternal(
@@ -84,7 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
         } catch (JwtException | IllegalArgumentException ex) {
-            log.debug("JWT validation failed: {}", ex.getMessage());
+            // log.debug("JWT validation failed: {}", ex.getMessage());
             // Invalid or expired JWT.
             // Leave the SecurityContext empty.
             // Spring Security will handle unauthorized access.

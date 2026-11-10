@@ -3,6 +3,7 @@ package com.nexora.banking.common.exception;
 import com.nexora.banking.common.response.ApiErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 
 import java.time.Instant;
 
@@ -337,5 +338,33 @@ public class GlobalExceptionHandler {
                 .status(status)
                 .body(response);
         }
+        
 
+        @ExceptionHandler(ConstraintViolationException.class)
+        public ResponseEntity<ApiErrorResponse> handleConstraintViolation(
+                ConstraintViolationException ex,
+                HttpServletRequest request
+        ) {
+
+        String message = ex.getConstraintViolations()
+                .stream()
+                .findFirst()
+                .map(violation -> violation.getMessage())
+                .orElse("Request validation failed.");
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "VALIDATION_ERROR",
+                message,
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
+        }
 }
