@@ -1,6 +1,8 @@
+
 package com.nexora.banking.funding.dto.request;
 
 import com.nexora.banking.funding.enums.FundingMethod;
+import com.nexora.banking.funding.enums.FundingProvider;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,7 +19,10 @@ public record CreateFundingRequest(
         BigDecimal amount,
 
         @NotNull(message = "Funding method is required.")
-        FundingMethod method
+        FundingMethod method,
+
+        @NotNull(message = "Funding provider is required.")
+        FundingProvider provider
 
 ) {
 }
