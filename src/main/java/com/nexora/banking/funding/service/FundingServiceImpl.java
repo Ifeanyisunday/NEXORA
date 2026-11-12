@@ -5,6 +5,7 @@ import com.nexora.banking.funding.dto.response.FundingResponse;
 import com.nexora.banking.funding.entity.Funding;
 import com.nexora.banking.funding.exception.FundingIdempotencyKeyConflictException;
 import com.nexora.banking.funding.provider.FundingProviderClient;
+import com.nexora.banking.funding.provider.FundingProviderRegistry;
 import com.nexora.banking.funding.provider.FundingProviderResult;
 import com.nexora.banking.funding.repository.FundingRepository;
 import com.nexora.banking.user.entity.User;
@@ -20,7 +21,7 @@ public class FundingServiceImpl implements FundingService {
 
     private final FundingRepository fundingRepository;
     private final FundingReservationService fundingReservationService;
-    private final FundingProviderClient fundingProviderClient;
+    private final FundingProviderRegistry fundingProviderRegistry;
 
     @Override
     public FundingResponse initiateFunding(
@@ -75,11 +76,13 @@ public class FundingServiceImpl implements FundingService {
         }
 
         /*
-         * Only newly created funding reservations
-         * are sent to the payment provider.
+         * Select the provider associated with this funding.
          */
+        FundingProviderClient providerClient =
+                fundingProviderRegistry.getClient(funding.getProvider());
+
         FundingProviderResult result =
-                fundingProviderClient.initiate(funding);
+                providerClient.initiate(funding);
 
         if (!result.successful()) {
             funding.markFailed();
@@ -89,7 +92,10 @@ public class FundingServiceImpl implements FundingService {
             );
         }
 
-        funding.markProcessing(result.providerReference());
+        funding.markProcessing(
+            result.providerReference(),
+            result.authorizationUrl()
+        );
 
         return FundingResponse.from(
                 fundingRepository.save(funding)

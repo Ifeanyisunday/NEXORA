@@ -144,7 +144,8 @@ class FundingIdempotencyIntegrationTest {
 
         CreateFundingRequest request = new CreateFundingRequest(
                 new BigDecimal("5000.00"),
-                FundingMethod.CARD
+                FundingMethod.CARD,
+                FundingProvider.MOCK
         );
 
         CountDownLatch providerStarted = new CountDownLatch(1);

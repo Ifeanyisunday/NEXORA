@@ -84,9 +84,10 @@ class FundingControllerIntegrationTest {
                 new BigDecimal("500.00"),
                 Currency.NGN,
                 FundingMethod.CARD,
-                FundingProvider.MOCK,
+                FundingProvider.PAYSTACK,
                 FundingStatus.PROCESSING,
-                "MOCK-123",
+                "PAYSTACK-123",
+                null, // authorizationUrl
                 Instant.now(),
                 null
         );
@@ -104,7 +105,8 @@ class FundingControllerIntegrationTest {
                         .content("""
                                 {
                                     "amount": 500.00,
-                                    "method": "CARD"
+                                    "method": "CARD",
+                                    "provider": "PAYSTACK"
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -112,6 +114,7 @@ class FundingControllerIntegrationTest {
                 .andExpect(jsonPath("$.amount").value(500.00))
                 .andExpect(jsonPath("$.currency").value("NGN"))
                 .andExpect(jsonPath("$.method").value("CARD"))
+                .andExpect(jsonPath("$.provider").value("PAYSTACK"))
                 .andExpect(jsonPath("$.status").value("PROCESSING"));
 
         verify(fundingService, times(1)).initiateFunding(
@@ -131,7 +134,8 @@ class FundingControllerIntegrationTest {
                         .content("""
                                 {
                                     "amount": 500.00,
-                                    "method": "CARD"
+                                    "method": "CARD",
+                                    "provider": "PAYSTACK"
                                 }
                                 """))
                 .andExpect(status().isUnauthorized());
@@ -149,7 +153,8 @@ class FundingControllerIntegrationTest {
                         .content("""
                                 {
                                     "amount": 500.00,
-                                    "method": "CARD"
+                                    "method": "CARD",
+                                    "provider": "PAYSTACK"
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
@@ -168,7 +173,8 @@ class FundingControllerIntegrationTest {
                         .content("""
                                 {
                                     "amount": 500.00,
-                                    "method": "CARD"
+                                    "method": "CARD",
+                                    "provider": "PAYSTACK"
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
@@ -189,7 +195,8 @@ class FundingControllerIntegrationTest {
                         .content("""
                                 {
                                     "amount": 500.00,
-                                    "method": "CARD"
+                                    "method": "CARD",
+                                    "provider": "PAYSTACK"
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
@@ -208,7 +215,8 @@ class FundingControllerIntegrationTest {
                         .content("""
                                 {
                                     "amount": 0,
-                                    "method": "CARD"
+                                    "method": "CARD",
+                                    "provider": "PAYSTACK"
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
@@ -227,7 +235,8 @@ class FundingControllerIntegrationTest {
                         .content("""
                                 {
                                     "amount": -100,
-                                    "method": "CARD"
+                                    "method": "CARD",
+                                    "provider": "PAYSTACK"
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
@@ -245,7 +254,8 @@ class FundingControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                    "amount": 500.00
+                                    "amount": 500.00,
+                                    "provider": "PAYSTACK"
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
@@ -263,6 +273,26 @@ class FundingControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
+                                    "method": "CARD",
+                                    "provider": "PAYSTACK"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(fundingService);
+    }
+
+    @Test
+    void initiateFunding_shouldRejectMissingFundingProvider()
+            throws Exception {
+
+        mockMvc.perform(post(FUNDING_URL)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .header("Idempotency-Key", "funding-missing-provider")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "amount": 500.00,
                                     "method": "CARD"
                                 }
                                 """))

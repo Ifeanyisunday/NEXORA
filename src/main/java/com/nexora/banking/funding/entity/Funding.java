@@ -1,3 +1,4 @@
+
 package com.nexora.banking.funding.entity;
 
 import com.nexora.banking.common.entity.BaseEntity;
@@ -126,10 +127,24 @@ public class Funding extends BaseEntity {
     )
     private String providerReference;
 
+    @Column(
+            name = "authorization_url",
+            length = 2048
+    )
+    private String authorizationUrl;
+
     @Column(name = "completed_at")
     private Instant completedAt;
 
     public void markProcessing(String providerReference) {
+        markProcessing(providerReference, null);
+    }
+
+    public void markProcessing(
+            String providerReference,
+            String authorizationUrl
+    ) {
+
         if (status != FundingStatus.PENDING) {
             throw new IllegalStateException(
                     "Only pending funding can enter processing."
@@ -143,10 +158,12 @@ public class Funding extends BaseEntity {
         }
 
         this.providerReference = providerReference;
+        this.authorizationUrl = authorizationUrl;
         this.status = FundingStatus.PROCESSING;
     }
 
     public void markFailed() {
+
         if (status != FundingStatus.PENDING
                 && status != FundingStatus.PROCESSING) {
             throw new IllegalStateException(
@@ -158,6 +175,7 @@ public class Funding extends BaseEntity {
     }
 
     public void markCompleted(Instant completedAt) {
+
         if (status != FundingStatus.PROCESSING) {
             throw new IllegalStateException(
                     "Only processing funding can be completed."

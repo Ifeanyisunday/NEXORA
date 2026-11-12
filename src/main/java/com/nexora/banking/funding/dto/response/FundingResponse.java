@@ -1,3 +1,4 @@
+
 package com.nexora.banking.funding.dto.response;
 
 import com.nexora.banking.funding.entity.Funding;
@@ -19,11 +20,13 @@ public record FundingResponse(
         FundingProvider provider,
         FundingStatus status,
         String providerReference,
+        String authorizationUrl,
         Instant createdAt,
         Instant completedAt
 ) {
 
     public static FundingResponse from(Funding funding) {
+
         return new FundingResponse(
                 funding.getId(),
                 funding.getReference(),
@@ -33,6 +36,7 @@ public record FundingResponse(
                 funding.getProvider(),
                 funding.getStatus(),
                 funding.getProviderReference(),
+                funding.getAuthorizationUrl(),
                 funding.getCreatedAt(),
                 funding.getCompletedAt()
         );

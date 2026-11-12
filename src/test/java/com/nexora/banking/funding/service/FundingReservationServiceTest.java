@@ -1,4 +1,3 @@
-
 package com.nexora.banking.funding.service;
 
 import com.nexora.banking.funding.dto.request.CreateFundingRequest;
@@ -63,7 +62,8 @@ class FundingReservationServiceTest {
 
         request = new CreateFundingRequest(
                 new BigDecimal("5000.00"),
-                FundingMethod.CARD
+                FundingMethod.CARD,
+                FundingProvider.PAYSTACK
         );
 
         existingFunding = Funding.builder()
@@ -72,7 +72,7 @@ class FundingReservationServiceTest {
                 .amount(new BigDecimal("5000.00"))
                 .currency(Currency.NGN)
                 .method(FundingMethod.CARD)
-                .provider(FundingProvider.MOCK)
+                .provider(FundingProvider.PAYSTACK)
                 .reference("FND-TEST-001")
                 .idempotencyKey(IDEMPOTENCY_KEY)
                 .status(FundingStatus.PENDING)
@@ -110,7 +110,8 @@ class FundingReservationServiceTest {
         CreateFundingRequest differentAmountRequest =
                 new CreateFundingRequest(
                         new BigDecimal("7000.00"),
-                        FundingMethod.CARD
+                        FundingMethod.CARD,
+                        FundingProvider.PAYSTACK
                 );
 
         // Act and Assert
@@ -130,7 +131,8 @@ class FundingReservationServiceTest {
         CreateFundingRequest differentMethodRequest =
                 new CreateFundingRequest(
                         new BigDecimal("5000.00"),
-                        FundingMethod.BANK_TRANSFER
+                        FundingMethod.BANK_TRANSFER,
+                        FundingProvider.PAYSTACK
                 );
 
         // Act and Assert
@@ -144,7 +146,28 @@ class FundingReservationServiceTest {
     }
 
     @Test
-    void shouldCreateNewReservationWhenIdempotencyKeyDoesNotExist() {
+    void shouldRejectSameKeyWhenFundingProviderIsDifferent() {
+
+        // Arrange
+        CreateFundingRequest differentProviderRequest =
+                new CreateFundingRequest(
+                        new BigDecimal("5000.00"),
+                        FundingMethod.CARD,
+                        FundingProvider.FLUTTERWAVE
+                );
+
+        // Act and Assert
+        assertThrows(
+                FundingIdempotencyKeyConflictException.class,
+                () -> fundingReservationService.validateSameRequest(
+                        existingFunding,
+                        differentProviderRequest
+                )
+        );
+    }
+
+    @Test
+    void shouldCreateNewPaystackReservationWhenIdempotencyKeyDoesNotExist() {
 
         // Arrange
         when(fundingRepository.findByUserAndIdempotencyKey(
@@ -190,7 +213,48 @@ class FundingReservationServiceTest {
         );
 
         assertEquals(
-                FundingProvider.MOCK,
+                FundingProvider.PAYSTACK,
+                reservation.funding().getProvider()
+        );
+
+        verify(fundingRepository, times(1))
+                .saveAndFlush(any(Funding.class));
+    }
+
+    @Test
+    void shouldCreateNewFlutterwaveReservationWhenFlutterwaveIsSelected() {
+
+        // Arrange
+        CreateFundingRequest flutterwaveRequest =
+                new CreateFundingRequest(
+                        new BigDecimal("5000.00"),
+                        FundingMethod.CARD,
+                        FundingProvider.FLUTTERWAVE
+                );
+
+        when(fundingRepository.findByUserAndIdempotencyKey(
+                currentUser,
+                IDEMPOTENCY_KEY
+        )).thenReturn(Optional.empty());
+
+        when(walletRepository.findByUser(currentUser))
+                .thenReturn(Optional.of(wallet));
+
+        when(fundingRepository.saveAndFlush(any(Funding.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        var reservation = fundingReservationService.reserve(
+                currentUser,
+                flutterwaveRequest,
+                IDEMPOTENCY_KEY
+        );
+
+        // Assert
+        assertTrue(reservation.newlyCreated());
+
+        assertEquals(
+                FundingProvider.FLUTTERWAVE,
                 reservation.funding().getProvider()
         );
 

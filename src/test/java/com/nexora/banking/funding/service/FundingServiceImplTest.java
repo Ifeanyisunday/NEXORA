@@ -5,10 +5,11 @@ import com.nexora.banking.funding.entity.Funding;
 import com.nexora.banking.funding.enums.FundingMethod;
 import com.nexora.banking.funding.enums.FundingProvider;
 import com.nexora.banking.funding.enums.FundingStatus;
+import com.nexora.banking.funding.exception.FundingIdempotencyKeyConflictException;
 import com.nexora.banking.funding.provider.FundingProviderClient;
+import com.nexora.banking.funding.provider.FundingProviderRegistry;
 import com.nexora.banking.funding.provider.FundingProviderResult;
 import com.nexora.banking.funding.repository.FundingRepository;
-import com.nexora.banking.funding.exception.FundingIdempotencyKeyConflictException;
 import com.nexora.banking.user.entity.User;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,6 +39,9 @@ class FundingServiceImplTest {
 
     @Mock
     private FundingReservationService fundingReservationService;
+
+    @Mock
+    private FundingProviderRegistry fundingProviderRegistry;
 
     @Mock
     private FundingProviderClient fundingProviderClient;
@@ -55,7 +60,8 @@ class FundingServiceImplTest {
 
         request = new CreateFundingRequest(
                 new BigDecimal("5000.00"),
-                FundingMethod.CARD
+                FundingMethod.CARD,
+                FundingProvider.MOCK
         );
 
         funding = Funding.builder()
@@ -72,7 +78,6 @@ class FundingServiceImplTest {
     @Test
     void shouldInitiateFundingWhenReservationIsNew() {
 
-        // Arrange
         String idempotencyKey = "TEST-KEY-001";
 
         when(fundingReservationService.reserve(
@@ -83,19 +88,20 @@ class FundingServiceImplTest {
                 new FundingReservationService.Reservation(funding, true)
         );
 
+        when(fundingProviderRegistry.getClient(FundingProvider.MOCK))
+                .thenReturn(fundingProviderClient);
+
         when(fundingProviderClient.initiate(funding))
                 .thenReturn(new FundingProviderResult(true, "MOCK-REF-001"));
 
         when(fundingRepository.save(funding)).thenReturn(funding);
 
-        // Act
         var response = fundingService.initiateFunding(
                 currentUser,
                 request,
                 idempotencyKey
         );
 
-        // Assert
         assertNotNull(response);
 
         assertEquals(
@@ -108,14 +114,16 @@ class FundingServiceImplTest {
                 funding.getProviderReference()
         );
 
-        verify(fundingProviderClient, times(1)).initiate(funding);
-        verify(fundingRepository, times(1)).save(funding);
+        verify(fundingProviderRegistry)
+                .getClient(FundingProvider.MOCK);
+
+        verify(fundingProviderClient).initiate(funding);
+        verify(fundingRepository).save(funding);
     }
 
     @Test
     void shouldReturnExistingFundingWithoutCallingProvider() {
 
-        // Arrange
         String idempotencyKey = "TEST-KEY-001";
 
         when(fundingReservationService.reserve(
@@ -126,16 +134,15 @@ class FundingServiceImplTest {
                 new FundingReservationService.Reservation(funding, false)
         );
 
-        // Act
         var response = fundingService.initiateFunding(
                 currentUser,
                 request,
                 idempotencyKey
         );
 
-        // Assert
         assertNotNull(response);
 
+        verifyNoInteractions(fundingProviderRegistry);
         verify(fundingProviderClient, never()).initiate(any());
         verify(fundingRepository, never()).save(any());
     }
@@ -143,7 +150,6 @@ class FundingServiceImplTest {
     @Test
     void shouldMarkFundingAsFailedWhenProviderRejectsRequest() {
 
-        // Arrange
         String idempotencyKey = "TEST-KEY-001";
 
         when(fundingReservationService.reserve(
@@ -154,19 +160,20 @@ class FundingServiceImplTest {
                 new FundingReservationService.Reservation(funding, true)
         );
 
+        when(fundingProviderRegistry.getClient(FundingProvider.MOCK))
+                .thenReturn(fundingProviderClient);
+
         when(fundingProviderClient.initiate(funding))
                 .thenReturn(new FundingProviderResult(false, null));
 
         when(fundingRepository.save(funding)).thenReturn(funding);
 
-        // Act
         var response = fundingService.initiateFunding(
                 currentUser,
                 request,
                 idempotencyKey
         );
 
-        // Assert
         assertNotNull(response);
 
         assertEquals(
@@ -174,15 +181,16 @@ class FundingServiceImplTest {
                 funding.getStatus()
         );
 
-        verify(fundingProviderClient, times(1)).initiate(funding);
-        verify(fundingRepository, times(1)).save(funding);
-    }
+        verify(fundingProviderRegistry)
+                .getClient(FundingProvider.MOCK);
 
+        verify(fundingProviderClient).initiate(funding);
+        verify(fundingRepository).save(funding);
+    }
 
     @Test
     void shouldReturnExistingFundingWhenConcurrentRequestWinsReservation() {
 
-        // Arrange
         String idempotencyKey = "TEST-KEY-001";
 
         when(fundingReservationService.reserve(
@@ -196,28 +204,27 @@ class FundingServiceImplTest {
         when(fundingRepository.findByUserAndIdempotencyKey(
                 currentUser,
                 idempotencyKey
-        )).thenReturn(java.util.Optional.of(funding));
+        )).thenReturn(Optional.of(funding));
 
-        // Act
         var response = fundingService.initiateFunding(
                 currentUser,
                 request,
                 idempotencyKey
         );
 
-        // Assert
         assertNotNull(response);
         assertEquals(funding.getReference(), response.reference());
 
-        verify(fundingReservationService).validateSameRequest(funding, request);
+        verify(fundingReservationService)
+                .validateSameRequest(funding, request);
+
+        verifyNoInteractions(fundingProviderRegistry);
         verify(fundingProviderClient, never()).initiate(any());
     }
-
 
     @Test
     void shouldRejectConcurrentRequestWhenIdempotencyKeyHasDifferentRequest() {
 
-        // Arrange
         String idempotencyKey = "TEST-KEY-001";
 
         when(fundingReservationService.reserve(
@@ -231,14 +238,13 @@ class FundingServiceImplTest {
         when(fundingRepository.findByUserAndIdempotencyKey(
                 currentUser,
                 idempotencyKey
-        )).thenReturn(java.util.Optional.of(funding));
+        )).thenReturn(Optional.of(funding));
 
         doThrow(new FundingIdempotencyKeyConflictException(
                 "This idempotency key has already been used with a different funding request."
         )).when(fundingReservationService)
                 .validateSameRequest(funding, request);
 
-        // Act and Assert
         assertThrows(
                 FundingIdempotencyKeyConflictException.class,
                 () -> fundingService.initiateFunding(
@@ -248,6 +254,7 @@ class FundingServiceImplTest {
                 )
         );
 
+        verifyNoInteractions(fundingProviderRegistry);
         verify(fundingProviderClient, never()).initiate(any());
     }
 }
