@@ -7,6 +7,13 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
 
+paystack:
+  enabled: ${PAYSTACK_ENABLED:false}
+  base-url: https://api.paystack.co
+  secret-key: ${PAYSTACK_SECRET_KEY:}
+  connect-timeout: 3s
+  read-timeout: 10s
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
